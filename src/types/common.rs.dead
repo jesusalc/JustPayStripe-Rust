@@ -1,0 +1,47 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CheckoutSessionResponse {
+    pub url: String,
+}
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+pub struct CheckoutSessionRequest {
+    pub user_id: String,
+    pub email: String,
+    pub description: Option<String>,
+    pub success_url: String,
+    pub cancel_url: String,
+    pub price_id: String,
+    pub quantity: Option<u32>,
+}
+pub async fn create_checkout_session(
+  Json(payload): Json<CheckoutSessionRequest>,
+  Extension(client): Extension<StripeClient>,
+  Extension(kv): Extension<KVStore>,
+) -> Json<serde_json::Value> {
+  let customer_id = create_customer(
+      &client,
+      &kv,
+      &payload.user_id,
+      &payload.email,
+      payload.description.as_deref(),
+  ).await.unwrap();
+
+  let session_params = vec![
+      ("customer", customer_id.as_str()),
+      ("success_url", payload.success_url.as_str()),
+      ("cancel_url", payload.cancel_url.as_str()),
+      ("mode", "subscription"),
+      ("line_items[0][price]", payload.price_id.as_str()),
+      ("line_items[0][quantity]", payload.quantity.unwrap_or(1).to_string().as_str()),
+  ];
+
+  let session: serde_json::Value = client
+      .post("https://api.stripe.com/v1/checkout/sessions", session_params)
+      .await
+      .unwrap();
+
+  Json(json!({ "url": session["url"] }))
+}

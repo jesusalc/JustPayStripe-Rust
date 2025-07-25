@@ -2,8 +2,6 @@ use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::Value;
 
-
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Customer {
@@ -46,8 +44,6 @@ pub struct InvoiceSettings {
     pub default_payment_method: Value,
     pub footer: Value,
 }
-
-
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -93,13 +89,7 @@ pub struct Plan {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Metadata {
-}
-
-
-
-
-
+pub struct Metadata {}
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -121,10 +111,6 @@ pub struct Address {
     pub postal_code: Option<String>,
     pub state: Option<String>,
 }
-
-
-
-
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -157,7 +143,6 @@ pub struct Checks {
     pub cvc_check: String,
 }
 
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PaymentMethods {
@@ -167,7 +152,6 @@ pub struct PaymentMethods {
     pub has_more: bool,
     pub data: Vec<PaymentMethod>,
 }
-
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -185,7 +169,6 @@ pub struct PaymentMethod {
     pub type_field: String,
 }
 
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Networks {
@@ -198,16 +181,6 @@ pub struct Networks {
 pub struct ThreeDSecureUsage {
     pub supported: bool,
 }
-
-
-
-
-
-
-
-
-
-
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -258,7 +231,7 @@ pub struct Subscription {
     #[serde(rename = "start_date")]
     pub start_date: Option<i64>,
     pub status: Option<String>,
-   // #[serde(rename = "application_fee_percent")]
+    // #[serde(rename = "application_fee_percent")]
     // pub application_fee_percent: Value,
     // #[serde(rename = "default_source")]
     // pub default_source: Value,
@@ -363,7 +336,6 @@ pub struct Price {
     pub unit_amount_decimal: String,
 }
 
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Recurring {
@@ -377,8 +349,6 @@ pub struct Recurring {
     #[serde(rename = "usage_type")]
     pub usage_type: String,
 }
-
-
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -507,8 +477,6 @@ pub struct Invoice {
     pub webhooks_delivered_at: i64,
 }
 
-
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InvoiceLines {
@@ -551,15 +519,12 @@ pub struct InvoiceLine {
     pub type_field: String,
 }
 
-
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Period {
     pub end: i64,
     pub start: i64,
 }
-
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

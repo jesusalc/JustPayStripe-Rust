@@ -1,0 +1,27 @@
+graph TD
+  Frontend[Frontend: Subscribe Button]
+  BackendAPI[/API: /api/checkout-session/]
+  CreateCustomer[Create Stripe Customer]
+  StoreMapping[Store userId <-> stripeCustomerId in KV]
+  CreateSession[Create Checkout Session]
+  StripeRedirect[Redirect to Stripe Checkout]
+  PaymentSuccess[User returns to /success]
+  SyncCall[Trigger syncStripeDataToKV]
+  KVSync["Sync subscription to KV"]
+  Webhook["/API: /api/stripe (Webhook)"]
+  EventFilter[Filter Relevant Events]
+  WebhookSync[Sync via Webhook -> syncStripeDataToKV]
+
+  Frontend -->|onClick| BackendAPI
+  BackendAPI --> CreateCustomer
+  CreateCustomer --> StoreMapping
+  StoreMapping --> CreateSession
+  CreateSession --> StripeRedirect
+  StripeRedirect --> PaymentSuccess
+  PaymentSuccess --> SyncCall
+  SyncCall --> KVSync
+
+  Stripe --> Webhook
+  Webhook --> EventFilter
+  EventFilter --> WebhookSync
+  WebhookSync --> KVSync

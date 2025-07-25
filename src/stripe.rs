@@ -2,7 +2,7 @@ pub mod response;
 
 use serde_json::json;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
 
 // Full V1 API Support Complete
@@ -14,12 +14,12 @@ pub struct Auth {
 }
 impl Auth {
     pub fn new(client: String, secret: String) -> Self {
-        return Auth{client, secret};
+        return Auth { client, secret };
     }
 }
 
 // Full V1 API Support Complete
-/// Represents your Stripe balance. 
+/// Represents your Stripe balance.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Balance {
@@ -29,54 +29,60 @@ pub struct Balance {
     pub pending: Vec<BalancePending>,
 }
 impl Balance {
-    
-    /// Asynchronously retrieves the current account balance based on the authentication that was used to make the request. 
-    /// 
+    /// Asynchronously retrieves the current account balance based on the authentication that was used to make the request.
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let balance = payup::stripe::Balance::async_get(auth).await;
+    /// let balance = justpaystripe::stripe::Balance::async_get(auth).await;
     /// ```
     pub async fn async_get(creds: Auth) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/balance");
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
-    /// Retrieves the current account balance based on the authentication that was used to make the request. 
-    /// 
+    /// Retrieves the current account balance based on the authentication that was used to make the request.
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let balance = payup::stripe::Balance::get(auth).await;
+    /// let balance = justpaystripe::stripe::Balance::get(auth).await;
     /// ```
     pub fn get(creds: Auth) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/balance");
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
 }
 
 // Full V1 API Support Complete
-/// Represents funds moving through your Stripe account. 
+/// Represents funds moving through your Stripe account.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BalanceTransaction {
@@ -102,53 +108,59 @@ pub struct BalanceTransaction {
     pub type_field: String,
 }
 impl BalanceTransaction {
-
     /// Asynchronously retrieves the balance transaction with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - A string representing an existing stripe transaction balance id
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Retrieve the balance transaction with the given ID.
-    /// let balance_transaction = payup::stripe::BalanceTransaction::async_get(auth, "txn_").await;
+    /// let balance_transaction = justpaystripe::stripe::BalanceTransaction::async_get(auth, "txn_").await;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/balance_transactions/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let mut url = format!(
+            "https://api.stripe.com/v1/balance_transactions/{}",
+            id.clone()
+        );
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
     /// Asynchronously lists all balance transactions
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Retrieve the balance transaction with the given ID.
-    /// let balance_transactions = payup::stripe::BalanceTransaction::async_list(auth).await;
+    /// let balance_transactions = justpaystripe::stripe::BalanceTransaction::async_list(auth).await;
     /// ```
-    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk_async(creds.clone(), starting_after).await?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -158,51 +170,57 @@ impl BalanceTransaction {
     }
 
     /// Retrieves the balance transaction with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - A string representing an existing stripe transaction balance id
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Retrieve the balance transaction with the given ID.
-    /// let balance_transaction = payup::stripe::BalanceTransaction::get(auth, "txn_").await;
+    /// let balance_transaction = justpaystripe::stripe::BalanceTransaction::get(auth, "txn_").await;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/balance_transactions/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let mut url = format!(
+            "https://api.stripe.com/v1/balance_transactions/{}",
+            id.clone()
+        );
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
 
     /// Lists all balance transactions
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Retrieve the balance transaction with the given ID.
-    /// let balance_transactions = payup::stripe::BalanceTransaction::async_list(auth).await;
+    /// let balance_transactions = justpaystripe::stripe::BalanceTransaction::async_list(auth).await;
     /// ```
-    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk(creds.clone(), starting_after)?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -211,27 +229,45 @@ impl BalanceTransaction {
         return Ok(objects);
     }
 
-    fn list_chunk(creds: Auth, starting_after: Option<String>) -> Result<BalanceTransactions, reqwest::Error> {
+    fn list_chunk(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<BalanceTransactions, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/balance_transactions".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/balance_transactions?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/balance_transactions?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<BalanceTransactions>()?;
         return Ok(json);
     }
 
-    async fn list_chunk_async(creds: Auth, starting_after: Option<String>) -> Result<BalanceTransactions, reqwest::Error> {
+    async fn list_chunk_async(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<BalanceTransactions, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/balance_transactions".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/balance_transactions?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/balance_transactions?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<BalanceTransactions>()?;
         return Ok(json);
@@ -255,17 +291,17 @@ pub struct Card {
 }
 impl Card {
     pub fn new() -> Self {
-        return Card{
-            id: None, 
-            brand: None, 
-            last4: None, 
-            number: None, 
-            cvc: None, 
-            network: None, 
-            country: None, 
+        return Card {
+            id: None,
+            brand: None,
+            last4: None,
+            number: None,
+            cvc: None,
+            network: None,
+            country: None,
             exp_month: None,
             exp_year: None,
-            fingerprint: None
+            fingerprint: None,
         };
     }
 }
@@ -344,13 +380,12 @@ pub struct Charge {
     // pub application_fee_amount: Value,
 }
 impl Charge {
-
     /// Returns an empty Charge object
     ///
     /// # Examples
     ///
     /// ```
-    /// let mut charge = payup::stripe::Charge::new();
+    /// let mut charge = justpaystripe::stripe::Charge::new();
     /// charge.amount = Some(100);
     /// charge.currency = Some(format!("usd"));
     /// charge.customer = Some(format!("cust_"));
@@ -359,10 +394,10 @@ impl Charge {
     /// charge.source = Some(format!("card_"));
     /// ```
     pub fn new() -> Self {
-        return Charge{
-            id: None, 
+        return Charge {
+            id: None,
             object: None,
-            amount: None, 
+            amount: None,
             stripe_amount: None,
             amount_captured: None,
             amount_refunded: None,
@@ -370,8 +405,8 @@ impl Charge {
             billing_details: None,
             captured: None,
             created: None,
-            currency: None, 
-            customer: None, 
+            currency: None,
+            customer: None,
             description: None,
             disputed: None,
             fraud_details: None,
@@ -383,27 +418,27 @@ impl Charge {
             refunded: None,
             refunds: None,
             status: None,
-            source: None, 
-            receipt_email: None, 
-            statement_descriptor: None, 
-            statement_descriptor_suffix: None
+            source: None,
+            receipt_email: None,
+            statement_descriptor: None,
+            statement_descriptor_suffix: None,
         };
     }
 
-    /// Asynchronously capture the payment of an existing, uncaptured, charge. 
+    /// Asynchronously capture the payment of an existing, uncaptured, charge.
     /// This is the second half of the two-step payment flow, where first you created a charge with the capture option set to false.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut charge = payup::stripe::Charge::new();
+    /// let mut charge = justpaystripe::stripe::Charge::new();
     /// charge.amount = Some(100);
     /// charge.currency = Some(format!("usd"));
     /// charge.customer = Some(format!("cust_"));
@@ -414,39 +449,48 @@ impl Charge {
     /// charge = charge.async_post(auth.clone()).await?;
     ///
     /// // Fetch customer using id
-    /// let captured_charge = payup::stripe::Charge::async_capture(charge, "cust_").await?;
+    /// let captured_charge = justpaystripe::stripe::Charge::async_capture(charge, "cust_").await?;
     /// ```
-    pub async fn async_capture(&self, creds: Auth) ->  Result<Self, reqwest::Error>{
-        let url = format!("https://api.stripe.com/v1/charges/{}/capture", self.id.clone().unwrap());
+    pub async fn async_capture(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let url = format!(
+            "https://api.stripe.com/v1/charges/{}/capture",
+            self.id.clone().unwrap()
+        );
 
-        let request = reqwest::Client::new().post(url)
+        let request = reqwest::Client::new()
+            .post(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_capture_params())
-            .send().await?;
-    
+            .send()
+            .await?;
+
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
-    /// Asynchronously retrieves the details of a charge that has previously been created. 
-    /// 
+    /// Asynchronously retrieves the details of a charge that has previously been created.
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the charge you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let charge = payup::stripe::Charge::async_get(auth, "ch_").await?;
+    /// let charge = justpaystripe::stripe::Charge::async_get(auth, "ch_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/charges/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
@@ -455,25 +499,25 @@ impl Charge {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let charges = payup::stripe::Charge::async_list(auth).await?;
+    /// let charges = justpaystripe::stripe::Charge::async_list(auth).await?;
     /// ```
-    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk_async(creds.clone(), starting_after).await?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -487,9 +531,9 @@ impl Charge {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut charge = payup::stripe::Charge::new();
+    /// let mut charge = justpaystripe::stripe::Charge::new();
     /// charge.amount = Some(100);
     /// charge.currency = Some(format!("usd"));
     /// charge.customer = Some(format!("cust_"));
@@ -499,12 +543,13 @@ impl Charge {
     ///
     /// charge = charge.async_post(auth.clone()).await?;
     /// ```
-    pub async fn async_post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
+    pub async fn async_post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
         let request = reqwest::Client::new()
             .post("https://api.stripe.com/v1/charges")
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
-            .send().await?;
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
@@ -515,9 +560,9 @@ impl Charge {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut charge = payup::stripe::Charge::new();
+    /// let mut charge = justpaystripe::stripe::Charge::new();
     /// charge.amount = Some(100);
     /// charge.currency = Some(format!("usd"));
     /// charge.customer = Some(format!("cust_"));
@@ -530,30 +575,35 @@ impl Charge {
     /// charge.receipt_email = Some(format!("testchanged@test.com"));
     /// charge = charge.async_update(auth.clone()).await?;
     /// ```
-    pub async fn async_update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::Client::new().post(format!("https://api.stripe.com/v1/charges/{}", self.clone().id.unwrap()))
+    pub async fn async_update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/charges/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
-            .send().await?;
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
-    /// Capture the payment of an existing, uncaptured, charge. 
+    /// Capture the payment of an existing, uncaptured, charge.
     /// This is the second half of the two-step payment flow, where first you created a charge with the capture option set to false.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut charge = payup::stripe::Charge::new();
+    /// let mut charge = justpaystripe::stripe::Charge::new();
     /// charge.amount = Some(100);
     /// charge.currency = Some(format!("usd"));
     /// charge.customer = Some(format!("cust_"));
@@ -564,39 +614,46 @@ impl Charge {
     /// charge = charge.post(auth.clone());
     ///
     /// // Fetch customer using id
-    /// let captured_charge = payup::stripe::Charge::capture(charge, "cust_");
+    /// let captured_charge = justpaystripe::stripe::Charge::capture(charge, "cust_");
     /// ```
-    pub fn capture(&self, creds: Auth) ->  Result<Self, reqwest::Error>{
-        let url = format!("https://api.stripe.com/v1/charges/{}/capture", self.id.clone().unwrap());
+    pub fn capture(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let url = format!(
+            "https://api.stripe.com/v1/charges/{}/capture",
+            self.id.clone().unwrap()
+        );
 
-        let request = reqwest::blocking::Client::new().post(url)
+        let request = reqwest::blocking::Client::new()
+            .post(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_capture_params())
             .send()?;
-    
+
         let json = request.json::<Self>()?;
         return Ok(json);
     }
 
-    /// Retrieves the details of a charge that has previously been created. 
-    /// 
+    /// Retrieves the details of a charge that has previously been created.
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the charge you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let charge = payup::stripe::Charge::get(auth, "ch_");
+    /// let charge = justpaystripe::stripe::Charge::get(auth, "ch_");
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/charges/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
@@ -605,25 +662,25 @@ impl Charge {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let charges = payup::stripe::Charge::list(auth)?;
+    /// let charges = justpaystripe::stripe::Charge::list(auth)?;
     /// ```
-    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk(creds.clone(), starting_after)?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -637,9 +694,9 @@ impl Charge {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut charge = payup::stripe::Charge::new();
+    /// let mut charge = justpaystripe::stripe::Charge::new();
     /// charge.amount = Some(100);
     /// charge.currency = Some(format!("usd"));
     /// charge.customer = Some(format!("cust_"));
@@ -649,7 +706,7 @@ impl Charge {
     ///
     /// charge = charge.post(auth.clone())?;
     /// ```
-    pub fn post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
+    pub fn post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
         let request = reqwest::blocking::Client::new()
             .post("https://api.stripe.com/v1/charges")
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -665,9 +722,9 @@ impl Charge {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut charge = payup::stripe::Charge::new();
+    /// let mut charge = justpaystripe::stripe::Charge::new();
     /// charge.amount = Some(100);
     /// charge.currency = Some(format!("usd"));
     /// charge.customer = Some(format!("cust_"));
@@ -680,8 +737,12 @@ impl Charge {
     /// charge.receipt_email = Some(format!("testchanged@test.com"));
     /// charge = charge.update(auth.clone()).await?;
     /// ```
-    pub fn update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post(format!("https://api.stripe.com/v1/charges/{}", self.clone().id.unwrap()))
+    pub fn update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/charges/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
             .send()?;
@@ -694,67 +755,88 @@ impl Charge {
         let mut url = "https://api.stripe.com/v1/charges".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/charges?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/charges?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<Charges>()?;
         return Ok(json);
     }
 
-    async fn list_chunk_async(creds: Auth, starting_after: Option<String>) -> Result<Charges, reqwest::Error> {
+    async fn list_chunk_async(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<Charges, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/charges".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/charges?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/charges?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
 
         let json = request.json::<Charges>().await?;
         return Ok(json);
     }
     fn to_capture_params(&self) -> Vec<(&str, &str)> {
         let mut params = vec![];
- 
-        match &self.receipt_email{
+
+        match &self.receipt_email {
             Some(receipt_email) => params.push(("receipt_email", receipt_email.as_str())),
             None => {}
         }
-        match &self.amount{
+        match &self.amount {
             Some(amount) => params.push(("amount", amount.as_str())),
             None => {}
         }
-        match &self.statement_descriptor{
-            Some(statement_descriptor) => params.push(("statement_descriptor", statement_descriptor.as_str())),
+        match &self.statement_descriptor {
+            Some(statement_descriptor) => {
+                params.push(("statement_descriptor", statement_descriptor.as_str()))
+            }
             None => {}
         }
-        match &self.statement_descriptor_suffix{
-            Some(statement_descriptor_suffix) => params.push(("statement_descriptor_suffix", statement_descriptor_suffix.as_str())),
+        match &self.statement_descriptor_suffix {
+            Some(statement_descriptor_suffix) => params.push((
+                "statement_descriptor_suffix",
+                statement_descriptor_suffix.as_str(),
+            )),
             None => {}
         }
         return params;
     }
     fn to_params(&self) -> Vec<(&str, &str)> {
         let mut params = vec![];
-        match &self.customer{
+        match &self.customer {
             Some(customer) => params.push(("customer", customer.as_str())),
             None => {}
         }
-        match &self.description{
+        match &self.description {
             Some(description) => params.push(("description", description.as_str())),
             None => {}
         }
-        match &self.receipt_email{
+        match &self.receipt_email {
             Some(receipt_email) => params.push(("receipt_email", receipt_email.as_str())),
             None => {}
         }
-        match &self.amount{
+        match &self.amount {
             Some(amount) => params.push(("amount", amount.as_str())),
             None => {}
         }
-        match &self.currency{
+        match &self.currency {
             Some(currency) => params.push(("currency", currency.as_str())),
             None => {}
         }
@@ -763,21 +845,25 @@ impl Charge {
         //     Some(shipping) => params.push(("shipping", shipping.as_str())),
         //     None => {}
         // }
-        match &self.source{
+        match &self.source {
             Some(source) => params.push(("source", source.as_str())),
             None => {}
         }
-        match &self.statement_descriptor{
-            Some(statement_descriptor) => params.push(("statement_descriptor", statement_descriptor.as_str())),
+        match &self.statement_descriptor {
+            Some(statement_descriptor) => {
+                params.push(("statement_descriptor", statement_descriptor.as_str()))
+            }
             None => {}
         }
-        match &self.statement_descriptor_suffix{
-            Some(statement_descriptor_suffix) => params.push(("statement_descriptor_suffix", statement_descriptor_suffix.as_str())),
+        match &self.statement_descriptor_suffix {
+            Some(statement_descriptor_suffix) => params.push((
+                "statement_descriptor_suffix",
+                statement_descriptor_suffix.as_str(),
+            )),
             None => {}
         }
         return params;
     }
-
 }
 
 /// Represents a customer of your business.
@@ -819,7 +905,7 @@ impl Customer {
     /// # Examples
     ///
     /// ```
-    /// let mut cust = payup::stripe::Customer::new();
+    /// let mut cust = justpaystripe::stripe::Customer::new();
     /// cust.name = Some("Rust Test".to_string());
     /// cust.description = Some("A test customer from rust.".to_string());
     /// cust.phone = Some("333-333-3333".to_string());
@@ -827,99 +913,112 @@ impl Customer {
     /// cust.payment_method = None;
     /// ```
     pub fn new() -> Self {
-        return Customer{
-            id: None, 
-            object: None, 
-            balance: None, 
-            created: None, 
-            currency: None, 
+        return Customer {
+            id: None,
+            object: None,
+            balance: None,
+            created: None,
+            currency: None,
             default_source: None,
-            payment_method: None, 
-            delinquent: None, 
-            description: None, 
-            email: None, 
-            invoice_prefix: None, 
-            livemode: None, 
-            name: None, 
-            next_invoice_sequence: None, 
-            phone: None, 
-            tax_exempt: None
+            payment_method: None,
+            delinquent: None,
+            description: None,
+            email: None,
+            invoice_prefix: None,
+            livemode: None,
+            name: None,
+            next_invoice_sequence: None,
+            phone: None,
+            tax_exempt: None,
         };
     }
 
- 
     /// Asynchronously destroy a stripe Customer
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - A string representing an existing stripe customer_id
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let customer = payup::stripe::Customer::async_delete(auth, "cust_").await?;
+    /// let customer = justpaystripe::stripe::Customer::async_delete(auth, "cust_").await?;
     /// ```
     pub async fn async_delete(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
-        
-        let request = reqwest::Client::new().delete(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+
+        let request = reqwest::Client::new()
+            .delete(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
-
     /// Asynchronously lookup a stripe Customer using customer_id
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - A string representing an existing stripe customer_id
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let customer = payup::stripe::Customer::async_get(auth, "cust_").await?;
+    /// let customer = justpaystripe::stripe::Customer::async_get(auth, "cust_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
     /// Asynchronously returns all Invoices belonging to the customer_id
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `customer_id` - A string representing an existing stripe customer_id
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let customers_invoices = payup::stripe::Customer::invoices(auth, format!("cust_")).await?;     
-    /// ```    
-    pub async fn async_invoices(creds: Auth, customer_id: String) -> Result<Vec<crate::stripe::response::Invoice>, reqwest::Error>{
+    /// let customers_invoices = justpaystripe::stripe::Customer::invoices(auth, format!("cust_")).await?;
+    /// ```
+    pub async fn async_invoices(
+        creds: Auth,
+        customer_id: String,
+    ) -> Result<Vec<crate::stripe::response::Invoice>, reqwest::Error> {
         let mut objects: Vec<crate::stripe::response::Invoice> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
-            let json = Self::get_invoices_chunk(creds.clone(), customer_id.clone(), starting_after.clone())?;
-            for json_object in json.data{
+        while has_more {
+            let json = Self::get_invoices_chunk(
+                creds.clone(),
+                customer_id.clone(),
+                starting_after.clone(),
+            )?;
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -928,30 +1027,29 @@ impl Customer {
         return Ok(objects);
     }
 
-
     /// Asynchronously returns all stripe customers owned by the account.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let customers = payup::stripe::Customer::async_list(auth).await?;
+    /// let customers = justpaystripe::stripe::Customer::async_list(auth).await?;
     /// ```
-    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk_async(creds.clone(), starting_after).await?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -961,10 +1059,10 @@ impl Customer {
     }
 
     /// Asynchronously returns all PaymentMethods belonging to the customer_id
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `customer_id` - A string representing an existing stripe customer_id
     /// * `method_type` - A string representing the type of payment method (acss_debit, afterpay_clearpay, alipay, au_becs_debit, bacs_debit, bancontact, boleto, card, eps, fpx, giropay, grabpay, ideal, klarna, oxxo, p24, sepa_debit, sofort, wechat_pay)
     ///
@@ -972,18 +1070,28 @@ impl Customer {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let customers_payment_methods = payup::stripe::Customer::async_payment_methods(auth, format!("cust_"), format!("card")).await?;     
+    /// let customers_payment_methods = justpaystripe::stripe::Customer::async_payment_methods(auth, format!("cust_"), format!("card")).await?;
     /// ```
-    pub async fn async_payment_methods(creds: Auth, customer_id: String, method_type: String) -> Result<Vec<crate::stripe::response::PaymentMethod>, reqwest::Error>{
+    pub async fn async_payment_methods(
+        creds: Auth,
+        customer_id: String,
+        method_type: String,
+    ) -> Result<Vec<crate::stripe::response::PaymentMethod>, reqwest::Error> {
         let mut objects: Vec<crate::stripe::response::PaymentMethod> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
-            let json = Self::get_payment_methods_chunk_async(creds.clone(), customer_id.clone(), method_type.clone(), starting_after.clone()).await?;
-            for json_object in json.data{
+        while has_more {
+            let json = Self::get_payment_methods_chunk_async(
+                creds.clone(),
+                customer_id.clone(),
+                method_type.clone(),
+                starting_after.clone(),
+            )
+            .await?;
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -992,66 +1100,66 @@ impl Customer {
         return Ok(objects);
     }
 
-
     /// Asynchronously POSTs a new customer to the stripe api
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Build a customer object
-    /// let mut cust = payup::stripe::Customer::new();
+    /// let mut cust = justpaystripe::stripe::Customer::new();
     /// cust.name = Some("Rust Test".to_string());
     /// cust.description = Some("A test customer from rust.".to_string());
     /// cust.phone = Some("333-333-3333".to_string());
     /// cust.email = Some("rust@test.com".to_string());
     /// cust.payment_method = None;
-    /// 
+    ///
     /// // Post customer to stripe and update the local cust variable
     /// let customer = cust.async_post(auth).await?;
     /// ```
-    pub async fn async_post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
+    pub async fn async_post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
         let request = reqwest::Client::new()
-        .post("https://api.stripe.com/v1/customers")
-        .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-        .form(&self.to_params())
-        .send().await;
-        match request{
+            .post("https://api.stripe.com/v1/customers")
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .form(&self.to_params())
+            .send()
+            .await;
+        match request {
             Ok(req) => {
                 let json = req.json::<Self>().await?;
-            
+
                 return Ok(json);
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
 
     /// Asynchronously POSTs updates to an existing stripe Customer
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Build a customer object
-    /// let mut customer = payup::stripe::Customer::new();
+    /// let mut customer = justpaystripe::stripe::Customer::new();
     /// customer.name = Some("Rust Test".to_string());
     /// customer.description = Some("A test customer from rust.".to_string());
     /// customer.phone = Some("333-333-3333".to_string());
     /// customer.email = Some("rust@test.com".to_string());
     /// customer.payment_method = None;
-    /// 
+    ///
     /// // Post customer to stripe and update the local cust variable
     /// customer = cust.async_post(auth).await?;
     ///
@@ -1061,88 +1169,105 @@ impl Customer {
     /// // Update customer
     /// customer = cust.async_update(auth).await?;
     /// ```
-    pub async fn async_update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::Client::new().post(format!("https://api.stripe.com/v1/customers/{}", self.clone().id.unwrap()))
+    pub async fn async_update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/customers/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
-            .send().await?;
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
     /// Destroy a stripe Customer
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - A string representing an existing stripe customer_id
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let customer = payup::stripe::Customer::async_delete(auth, "cust_").await?;
+    /// let customer = justpaystripe::stripe::Customer::async_delete(auth, "cust_").await?;
     /// ```
     pub fn delete(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
-        
-        let request = reqwest::blocking::Client::new().delete(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+
+        let request = reqwest::blocking::Client::new()
+            .delete(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<Self>()?;
         return Ok(json);
     }
 
- 
     /// Lookup a stripe Customer using customer_id
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - A string representing an existing stripe customer_id
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let customer = payup::stripe::Customer::get(auth, "cust_")?;
+    /// let customer = justpaystripe::stripe::Customer::get(auth, "cust_")?;
     /// ```
     pub fn get(auth: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(auth.client.as_str(), Some(auth.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(auth.client.as_str(), Some(auth.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
 
     /// Returns all Invoices belonging to the customer_id
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - A string representing an existing stripe customer_id
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let customers_invoices = payup::stripe::Customer::invoices(auth, format!("cust_"))?;     
-    /// ```    
-    pub fn invoices(creds: Auth, customer_id: String) -> Result<Vec<crate::stripe::response::Invoice>, reqwest::Error>{
+    /// let customers_invoices = justpaystripe::stripe::Customer::invoices(auth, format!("cust_"))?;
+    /// ```
+    pub fn invoices(
+        creds: Auth,
+        customer_id: String,
+    ) -> Result<Vec<crate::stripe::response::Invoice>, reqwest::Error> {
         let mut objects: Vec<crate::stripe::response::Invoice> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
-            let json = Self::get_invoices_chunk(creds.clone(), customer_id.clone(), starting_after.clone())?;
-            for json_object in json.data{
+        while has_more {
+            let json = Self::get_invoices_chunk(
+                creds.clone(),
+                customer_id.clone(),
+                starting_after.clone(),
+            )?;
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -1151,30 +1276,29 @@ impl Customer {
         return Ok(objects);
     }
 
-
     /// Returns all stripe customers
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let customers = payup::stripe::Customer::list(auth.clone())?;
+    /// let customers = justpaystripe::stripe::Customer::list(auth.clone())?;
     /// ```
-    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk(creds.clone(), starting_after)?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -1183,18 +1307,11 @@ impl Customer {
         return Ok(objects);
     }
 
-    
-
-
-
- 
-
-   
     /// Returns all PaymentMethods belonging to the customer_id
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `customer_id` - A string representing an existing stripe customer_id
     /// * `method_type` - A string representing the type of payment method (acss_debit, afterpay_clearpay, alipay, au_becs_debit, bacs_debit, bancontact, boleto, card, eps, fpx, giropay, grabpay, ideal, klarna, oxxo, p24, sepa_debit, sofort, wechat_pay)
     ///
@@ -1202,18 +1319,27 @@ impl Customer {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let customers_payment_methods = payup::stripe::Customer::payment_methods(auth, format!("cust_"), format!("card"))?;     
+    /// let customers_payment_methods = justpaystripe::stripe::Customer::payment_methods(auth, format!("cust_"), format!("card"))?;
     /// ```
-    pub fn payment_methods(creds: Auth, customer_id: String, method_type: String) -> Result<Vec<crate::stripe::response::PaymentMethod>, reqwest::Error>{
+    pub fn payment_methods(
+        creds: Auth,
+        customer_id: String,
+        method_type: String,
+    ) -> Result<Vec<crate::stripe::response::PaymentMethod>, reqwest::Error> {
         let mut objects: Vec<crate::stripe::response::PaymentMethod> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
-            let json = Self::get_payment_methods_chunk(creds.clone(), customer_id.clone(), method_type.clone(), starting_after.clone())?;
-            for json_object in json.data{
+        while has_more {
+            let json = Self::get_payment_methods_chunk(
+                creds.clone(),
+                customer_id.clone(),
+                method_type.clone(),
+                starting_after.clone(),
+            )?;
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -1223,64 +1349,64 @@ impl Customer {
     }
 
     /// POSTs a new customer to the stripe api
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Build a customer object
-    /// let mut cust = payup::stripe::Customer::new();
+    /// let mut cust = justpaystripe::stripe::Customer::new();
     /// cust.name = Some("Rust Test".to_string());
     /// cust.description = Some("A test customer from rust.".to_string());
     /// cust.phone = Some("333-333-3333".to_string());
     /// cust.email = Some("rust@test.com".to_string());
     /// cust.payment_method = None;
-    /// 
+    ///
     /// // Post customer to stripe and update the local cust variable
     /// let customer = cust.post(auth).unwrap();
     /// ```
-    pub fn post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post("https://api.stripe.com/v1/customers")
-        .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-        .form(&self.to_params())
-        .send();
+    pub fn post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post("https://api.stripe.com/v1/customers")
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .form(&self.to_params())
+            .send();
 
-        match request{
+        match request {
             Ok(req) => {
                 let json = req.json::<Self>()?;
                 Ok(json)
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
 
- 
     /// POSTs updates to an existing stripe Customer
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Build a customer object
-    /// let mut customer = payup::stripe::Customer::new();
+    /// let mut customer = justpaystripe::stripe::Customer::new();
     /// customer.name = Some("Rust Test".to_string());
     /// customer.description = Some("A test customer from rust.".to_string());
     /// customer.phone = Some("333-333-3333".to_string());
     /// customer.email = Some("rust@test.com".to_string());
     /// customer.payment_method = None;
-    /// 
+    ///
     /// // Post customer to stripe and update the local cust variable
     /// customer = cust.async_post(auth)?;
     ///
@@ -1290,8 +1416,12 @@ impl Customer {
     /// // Update customer
     /// customer = cust.update(auth)?;
     /// ```
-    pub fn update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post(format!("https://api.stripe.com/v1/customers/{}", self.clone().id.unwrap()))
+    pub fn update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/customers/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
             .send()?;
@@ -1300,99 +1430,165 @@ impl Customer {
         return Ok(json);
     }
 
-    fn get_invoices_chunk(creds: Auth, customer_id: String, starting_after: Option<String>) ->  Result<crate::stripe::response::Invoices, reqwest::Error>{  
-        let mut url = format!("https://api.stripe.com/v1/invoices?customer={}", customer_id);
+    fn get_invoices_chunk(
+        creds: Auth,
+        customer_id: String,
+        starting_after: Option<String>,
+    ) -> Result<crate::stripe::response::Invoices, reqwest::Error> {
+        let mut url = format!(
+            "https://api.stripe.com/v1/invoices?customer={}",
+            customer_id
+        );
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/invoices?customer={}&starting_after={}", customer_id, starting_after.unwrap())
+            url = format!(
+                "https://api.stripe.com/v1/invoices?customer={}&starting_after={}",
+                customer_id,
+                starting_after.unwrap()
+            )
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
-  
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
+
         let json = request.json::<crate::stripe::response::Invoices>()?;
         return Ok(json);
     }
 
-    fn list_chunk(creds: Auth, starting_after: Option<String>) -> Result<Customers, reqwest::Error> {
+    fn list_chunk(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<Customers, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/customers".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/customers?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/customers?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<Customers>()?;
         return Ok(json);
     }
 
-    async fn list_chunk_async(creds: Auth, starting_after: Option<String>) -> Result<Customers, reqwest::Error> {
+    async fn list_chunk_async(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<Customers, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/customers".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/customers?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/customers?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
- 
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
+
         let json = request.json::<Customers>().await?;
         return Ok(json);
     }
 
-    fn get_payment_methods_chunk(creds: Auth, customer_id: String, method_type: String, starting_after: Option<String>) ->  Result<crate::stripe::response::PaymentMethods, reqwest::Error>{
-        let mut url = format!("https://api.stripe.com/v1/customers/{}/payment_methods?type={}", customer_id, method_type);
+    fn get_payment_methods_chunk(
+        creds: Auth,
+        customer_id: String,
+        method_type: String,
+        starting_after: Option<String>,
+    ) -> Result<crate::stripe::response::PaymentMethods, reqwest::Error> {
+        let mut url = format!(
+            "https://api.stripe.com/v1/customers/{}/payment_methods?type={}",
+            customer_id, method_type
+        );
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/customers/{}/payment_methods?type={}&starting_after={}", customer_id, method_type, starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/customers/{}/payment_methods?type={}&starting_after={}",
+                customer_id,
+                method_type,
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
-   
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
+
         let json = request.json::<crate::stripe::response::PaymentMethods>()?;
         return Ok(json);
     }
 
-    async fn get_payment_methods_chunk_async(creds: Auth, customer_id: String, method_type: String, starting_after: Option<String>) ->  Result<crate::stripe::response::PaymentMethods, reqwest::Error>{
-        let mut url = format!("https://api.stripe.com/v1/customers/{}/payment_methods?type={}", customer_id, method_type);
+    async fn get_payment_methods_chunk_async(
+        creds: Auth,
+        customer_id: String,
+        method_type: String,
+        starting_after: Option<String>,
+    ) -> Result<crate::stripe::response::PaymentMethods, reqwest::Error> {
+        let mut url = format!(
+            "https://api.stripe.com/v1/customers/{}/payment_methods?type={}",
+            customer_id, method_type
+        );
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/customers/{}/payment_methods?type={}&starting_after={}", customer_id, method_type, starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/customers/{}/payment_methods?type={}&starting_after={}",
+                customer_id,
+                method_type,
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
-     
-        let json = request.json::<crate::stripe::response::PaymentMethods>().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
+
+        let json = request
+            .json::<crate::stripe::response::PaymentMethods>()
+            .await?;
         return Ok(json);
     }
 
     fn to_params(&self) -> Vec<(&str, &str)> {
         // return Customer{client, secret};
         let mut params = vec![];
-        match &self.payment_method{
+        match &self.payment_method {
             Some(payment_method) => params.push(("payment_method", payment_method.as_str())),
             None => {}
         }
-        match &self.description{
+        match &self.description {
             Some(description) => params.push(("description", description.as_str())),
             None => {}
         }
-        match &self.email{
+        match &self.email {
             Some(email) => params.push(("email", email.as_str())),
             None => {}
         }
-        match &self.name{
+        match &self.name {
             Some(name) => params.push(("name", name.as_str())),
             None => {}
         }
-        match &self.phone{
+        match &self.phone {
             Some(phone) => params.push(("phone", phone.as_str())),
             None => {}
         }
         return params;
     }
 }
-
-
 
 /// Represents a charge to a credit or a debit card.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1419,33 +1615,32 @@ pub struct Dispute {
     pub status: Option<String>,
 }
 impl Dispute {
-
     /// Returns an empty Dispute object
     ///
     /// # Examples
     ///
     /// ```
-    /// let mut dispute = payup::stripe::Dispute::new();
+    /// let mut dispute = justpaystripe::stripe::Dispute::new();
     /// dispute.amount = Some(100);
     /// ```
     pub fn new() -> Self {
-        return Dispute{
-            id: None, 
+        return Dispute {
+            id: None,
             object: None,
-            amount: None, 
+            amount: None,
             charge: None,
             created: None,
             currency: None,
             // balance_transactions: None,
             // captured: None,
-            evidence: None, 
+            evidence: None,
             evidence_details: None,
             is_charge_refundable: None,
             livemode: None,
             submit: None,
             payment_intent: None,
             reason: None,
-            status: None
+            status: None,
         };
     }
 
@@ -1455,43 +1650,50 @@ impl Dispute {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut dispute = payup::stripe::Dispute::new();
+    /// let mut dispute = justpaystripe::stripe::Dispute::new();
     /// dispute.id = Some(format!("dp_"));
     ///
     /// dispute = dispute.async_close(auth.clone()).await?;
     /// ```
-    pub async fn async_close(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::Client::new().post(format!("https://api.stripe.com/v1/disputes/{}/close", self.clone().id.unwrap()))
+    pub async fn async_close(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/disputes/{}/close",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-            .send().await?;
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
-
-
     /// Asynchronously retrieves the dispute with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the dispute you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let dispute = payup::stripe::Dispute::async_get(auth, "ch_").await?;
+    /// let dispute = justpaystripe::stripe::Dispute::async_get(auth, "ch_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/disputes/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
@@ -1500,25 +1702,25 @@ impl Dispute {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let disputes = payup::stripe::Dispute::async_list(auth).await?;
+    /// let disputes = justpaystripe::stripe::Dispute::async_list(auth).await?;
     /// ```
-    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk_async(creds.clone(), starting_after).await?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -1532,14 +1734,14 @@ impl Dispute {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Crate some evidence to update the dispute with
-    /// let mut evidence = payup::stripe::Evidence::new();
+    /// let mut evidence = justpaystripe::stripe::Evidence::new();
     /// evidence.billing_address = Some(format!(""));
     /// evidence.cancellation_policy = Some(format!(""));
     ///
-    /// let mut dispute = payup::stripe::Dispute::new();
+    /// let mut dispute = justpaystripe::stripe::Dispute::new();
     /// dispute.id = Some(format!("dp_"));
     /// dispute.evidence = Some(evidence);
     ///
@@ -1549,11 +1751,16 @@ impl Dispute {
     /// // Update the dispute
     /// dispute = dispute.async_update(auth.clone()).await?;
     /// ```
-    pub async fn async_update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::Client::new().post(format!("https://api.stripe.com/v1/disputes/{}", self.clone().id.unwrap()))
+    pub async fn async_update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/disputes/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
-            .send().await?;
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
@@ -1565,15 +1772,19 @@ impl Dispute {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut dispute = payup::stripe::Dispute::new();
+    /// let mut dispute = justpaystripe::stripe::Dispute::new();
     /// dispute.id = Some(format!("dp_"));
     ///
     /// dispute = dispute.async_close(auth.clone())?;
     /// ```
-    pub fn close(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post(format!("https://api.stripe.com/v1/disputes/{}/close", self.clone().id.unwrap()))
+    pub fn close(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/disputes/{}/close",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .send()?;
 
@@ -1582,24 +1793,27 @@ impl Dispute {
     }
 
     /// Retrieves the dispute with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the dispute you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let dispute = payup::stripe::Dispute::get(auth, "ch_")?;
+    /// let dispute = justpaystripe::stripe::Dispute::get(auth, "ch_")?;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/disputes/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
@@ -1608,25 +1822,25 @@ impl Dispute {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let charges = payup::stripe::Dispute::list(auth)?;
+    /// let charges = justpaystripe::stripe::Dispute::list(auth)?;
     /// ```
-    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk(creds.clone(), starting_after)?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -1635,20 +1849,19 @@ impl Dispute {
         return Ok(objects);
     }
 
-
     /// POSTs an update to an existing Dispute
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Crate some evidence to update the dispute with
-    /// let mut evidence = payup::stripe::Evidence::new();
+    /// let mut evidence = justpaystripe::stripe::Evidence::new();
     /// evidence.billing_address = Some(format!(""));
     /// evidence.cancellation_policy = Some(format!(""));
     ///
-    /// let mut dispute = payup::stripe::Dispute::new();
+    /// let mut dispute = justpaystripe::stripe::Dispute::new();
     /// dispute.id = Some(format!("dp_"));
     /// dispute.evidence = Some(evidence);
     ///
@@ -1658,8 +1871,12 @@ impl Dispute {
     /// // Update the dispute
     /// dispute = dispute.async_update(auth.clone())?;
     /// ```
-    pub fn update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post(format!("https://api.stripe.com/v1/disputes/{}", self.clone().id.unwrap()))
+    pub fn update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/disputes/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
             .send()?;
@@ -1672,23 +1889,39 @@ impl Dispute {
         let mut url = "https://api.stripe.com/v1/disputes".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/disputes?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/disputes?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<Disputes>()?;
         return Ok(json);
     }
 
-    async fn list_chunk_async(creds: Auth, starting_after: Option<String>) -> Result<Disputes, reqwest::Error> {
+    async fn list_chunk_async(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<Disputes, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/disputes".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/disputes?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/disputes?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
 
         let json = request.json::<Disputes>().await?;
         return Ok(json);
@@ -1696,201 +1929,245 @@ impl Dispute {
 
     fn to_params(&self) -> Vec<(&str, &str)> {
         let mut params = vec![];
-        match &self.evidence{
+        match &self.evidence {
             Some(evidence) => {
-
-                match &evidence.access_activity_log{
+                match &evidence.access_activity_log {
                     Some(access_activity_log) => {
-                        params.push(("evidence[access_activity_log]", access_activity_log.as_str()));
-                    },
+                        params.push((
+                            "evidence[access_activity_log]",
+                            access_activity_log.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.billing_address{
+                match &evidence.billing_address {
                     Some(billing_address) => {
                         params.push(("evidence[billing_address]", billing_address.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.cancellation_policy{
+                match &evidence.cancellation_policy {
                     Some(cancellation_policy) => {
-                        params.push(("evidence[cancellation_policy]", cancellation_policy.as_str()));
-                    },
+                        params.push((
+                            "evidence[cancellation_policy]",
+                            cancellation_policy.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.cancellation_policy_disclosure{
+                match &evidence.cancellation_policy_disclosure {
                     Some(cancellation_policy_disclosure) => {
-                        params.push(("evidence[cancellation_policy_disclosure]", cancellation_policy_disclosure.as_str()));
-                    },
+                        params.push((
+                            "evidence[cancellation_policy_disclosure]",
+                            cancellation_policy_disclosure.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.cancellation_rebuttal{
+                match &evidence.cancellation_rebuttal {
                     Some(cancellation_rebuttal) => {
-                        params.push(("evidence[cancellation_rebuttal]", cancellation_rebuttal.as_str()));
-                    },
+                        params.push((
+                            "evidence[cancellation_rebuttal]",
+                            cancellation_rebuttal.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.customer_communication{
+                match &evidence.customer_communication {
                     Some(customer_communication) => {
-                        params.push(("evidence[customer_communication]", customer_communication.as_str()));
-                    },
+                        params.push((
+                            "evidence[customer_communication]",
+                            customer_communication.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.customer_email_address{
+                match &evidence.customer_email_address {
                     Some(customer_email_address) => {
-                        params.push(("evidence[customer_email_address]", customer_email_address.as_str()));
-                    },
+                        params.push((
+                            "evidence[customer_email_address]",
+                            customer_email_address.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.customer_name{
+                match &evidence.customer_name {
                     Some(customer_name) => {
                         params.push(("evidence[customer_name]", customer_name.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.customer_purchase_ip{
+                match &evidence.customer_purchase_ip {
                     Some(customer_purchase_ip) => {
-                        params.push(("evidence[customer_purchase_ip]", customer_purchase_ip.as_str()));
-                    },
+                        params.push((
+                            "evidence[customer_purchase_ip]",
+                            customer_purchase_ip.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.customer_signature{
+                match &evidence.customer_signature {
                     Some(customer_signature) => {
                         params.push(("evidence[customer_signature]", customer_signature.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.duplicate_charge_documentation{
+                match &evidence.duplicate_charge_documentation {
                     Some(duplicate_charge_documentation) => {
-                        params.push(("evidence[duplicate_charge_documentation]", duplicate_charge_documentation.as_str()));
-                    },
+                        params.push((
+                            "evidence[duplicate_charge_documentation]",
+                            duplicate_charge_documentation.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.duplicate_charge_explanation{
+                match &evidence.duplicate_charge_explanation {
                     Some(duplicate_charge_explanation) => {
-                        params.push(("evidence[duplicate_charge_explanation]", duplicate_charge_explanation.as_str()));
-                    },
+                        params.push((
+                            "evidence[duplicate_charge_explanation]",
+                            duplicate_charge_explanation.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.duplicate_charge_id{
+                match &evidence.duplicate_charge_id {
                     Some(duplicate_charge_id) => {
-                        params.push(("evidence[duplicate_charge_id]", duplicate_charge_id.as_str()));
-                    },
+                        params.push((
+                            "evidence[duplicate_charge_id]",
+                            duplicate_charge_id.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.product_description{
+                match &evidence.product_description {
                     Some(product_description) => {
-                        params.push(("evidence[product_description]", product_description.as_str()));
-                    },
+                        params.push((
+                            "evidence[product_description]",
+                            product_description.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.receipt{
+                match &evidence.receipt {
                     Some(receipt) => {
                         params.push(("evidence[receipt]", receipt.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.refund_policy{
+                match &evidence.refund_policy {
                     Some(refund_policy) => {
                         params.push(("evidence[refund_policy]", refund_policy.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.refund_policy_disclosure{
+                match &evidence.refund_policy_disclosure {
                     Some(refund_policy_disclosure) => {
-                        params.push(("evidence[refund_policy_disclosure]", refund_policy_disclosure.as_str()));
-                    },
+                        params.push((
+                            "evidence[refund_policy_disclosure]",
+                            refund_policy_disclosure.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.refund_refusal_explanation{
+                match &evidence.refund_refusal_explanation {
                     Some(refund_refusal_explanation) => {
-                        params.push(("evidence[refund_refusal_explanation]", refund_refusal_explanation.as_str()));
-                    },
+                        params.push((
+                            "evidence[refund_refusal_explanation]",
+                            refund_refusal_explanation.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.service_date{
+                match &evidence.service_date {
                     Some(service_date) => {
                         params.push(("evidence[service_date]", service_date.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.service_documentation{
+                match &evidence.service_documentation {
                     Some(service_documentation) => {
-                        params.push(("evidence[service_documentation]", service_documentation.as_str()));
-                    },
+                        params.push((
+                            "evidence[service_documentation]",
+                            service_documentation.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.shipping_address{
+                match &evidence.shipping_address {
                     Some(shipping_address) => {
                         params.push(("evidence[shipping_address]", shipping_address.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.shipping_carrier{
+                match &evidence.shipping_carrier {
                     Some(shipping_carrier) => {
                         params.push(("evidence[shipping_carrier]", shipping_carrier.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.shipping_date{
+                match &evidence.shipping_date {
                     Some(shipping_date) => {
                         params.push(("evidence[shipping_date]", shipping_date.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.shipping_documentation{
+                match &evidence.shipping_documentation {
                     Some(shipping_documentation) => {
-                        params.push(("evidence[shipping_documentation]", shipping_documentation.as_str()));
-                    },
+                        params.push((
+                            "evidence[shipping_documentation]",
+                            shipping_documentation.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.shipping_tracking_number{
+                match &evidence.shipping_tracking_number {
                     Some(shipping_tracking_number) => {
-                        params.push(("evidence[shipping_tracking_number]", shipping_tracking_number.as_str()));
-                    },
+                        params.push((
+                            "evidence[shipping_tracking_number]",
+                            shipping_tracking_number.as_str(),
+                        ));
+                    }
                     None => {}
                 }
 
-                match &evidence.uncategorized_file{
+                match &evidence.uncategorized_file {
                     Some(uncategorized_file) => {
                         params.push(("evidence[uncategorized_file]", uncategorized_file.as_str()));
-                    },
+                    }
                     None => {}
                 }
 
-                match &evidence.uncategorized_text{
+                match &evidence.uncategorized_text {
                     Some(uncategorized_text) => {
                         params.push(("evidence[uncategorized_text]", uncategorized_text.as_str()));
-                    },
+                    }
                     None => {}
                 }
-
-
-
-            },
+            }
             None => {}
         }
         // "metadata[order_id]"=6735
@@ -1898,24 +2175,18 @@ impl Dispute {
         //     Some(metadata) => params.push(("metadata", metadata.as_str())),
         //     None => {}
         // }
-        match &self.submit{
+        match &self.submit {
             Some(submit) => {
-
-                if *submit{
+                if *submit {
                     params.push(("submit", "true"));
                 } else {
                     params.push(("submit", "false"));
                 }
-
-
-               
-
-            },
+            }
             None => {}
         }
         return params;
     }
-
 }
 
 // TODO - Impliment data/object. This can be any stripe object so it's best to build out the other structs before implementing.
@@ -1936,27 +2207,29 @@ pub struct Event {
     pub type_field: Option<String>,
 }
 impl Event {
-
-
     /// Asynchronously retrieves the event with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the event you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let event = payup::stripe::Event::async_get(auth, "ch_").await?;
+    /// let event = justpaystripe::stripe::Event::async_get(auth, "ch_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/events/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
@@ -1965,25 +2238,25 @@ impl Event {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let events = payup::stripe::Event::async_list(auth).await?;
+    /// let events = justpaystripe::stripe::Event::async_list(auth).await?;
     /// ```
-    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk_async(creds.clone(), starting_after).await?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -1992,26 +2265,28 @@ impl Event {
         return Ok(objects);
     }
 
-
     /// Retrieves the event with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the event you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let event = payup::stripe::Event::get(auth, "ch_")?;
+    /// let event = justpaystripe::stripe::Event::get(auth, "ch_")?;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/events/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
@@ -2020,25 +2295,25 @@ impl Event {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let events = payup::stripe::Event::list(auth)?;
+    /// let events = justpaystripe::stripe::Event::list(auth)?;
     /// ```
-    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk(creds.clone(), starting_after)?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -2047,36 +2322,50 @@ impl Event {
         return Ok(objects);
     }
 
-
     fn list_chunk(creds: Auth, starting_after: Option<String>) -> Result<Events, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/events".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/events?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/events?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<Events>()?;
         return Ok(json);
     }
 
-    async fn list_chunk_async(creds: Auth, starting_after: Option<String>) -> Result<Events, reqwest::Error> {
+    async fn list_chunk_async(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<Events, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/events".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/events?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/events?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
 
         let json = request.json::<Events>().await?;
         return Ok(json);
     }
-
 }
 
-/// Represents a file hosted on Stripe's servers. 
+/// Represents a file hosted on Stripe's servers.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct File {
     pub id: Option<String>,
@@ -2095,17 +2384,16 @@ pub struct File {
     pub file: Option<Vec<u8>>,
 }
 impl File {
-
     /// Returns an empty File object
     ///
     /// # Examples
     ///
     /// ```
-    /// let mut file = payup::stripe::File::new();
+    /// let mut file = justpaystripe::stripe::File::new();
     /// file.title = Some(format!("Title"));
     /// ```
     pub fn new() -> Self {
-        return File{
+        return File {
             id: None,
             object: None,
             created: None,
@@ -2121,26 +2409,29 @@ impl File {
         };
     }
 
-
     /// Asynchronously retrieves a file with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the file you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let file = payup::stripe::File::async_get(auth, "ch_").await?;
+    /// let file = justpaystripe::stripe::File::async_get(auth, "ch_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/files/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
@@ -2149,25 +2440,25 @@ impl File {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let disputes = payup::stripe::Dispute::async_list(auth).await?;
+    /// let disputes = justpaystripe::stripe::Dispute::async_list(auth).await?;
     /// ```
-    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk_async(creds.clone(), starting_after).await?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -2181,9 +2472,9 @@ impl File {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut file = payup::stripe::File::new();
+    /// let mut file = justpaystripe::stripe::File::new();
     /// ley bytes: Vec<u8> = Vec::new();
     /// charge.amount = Some(100);
     /// file.file = Some(bytes);
@@ -2194,17 +2485,15 @@ impl File {
     ///
     /// file = file.post(auth.clone()).await?;
     /// ```
-    pub async fn async_post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-
+    pub async fn async_post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
         let mut form = self.to_multipart_form_async().await;
 
         let request = reqwest::Client::new()
             .post("https://api.stripe.com/v1/files")
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .multipart(form)
-            .send().await?;
-
-
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
@@ -2215,9 +2504,9 @@ impl File {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut file = payup::stripe::File::new();
+    /// let mut file = justpaystripe::stripe::File::new();
     /// ley bytes: Vec<u8> = Vec::new();
     /// charge.amount = Some(100);
     /// file.file = Some(bytes);
@@ -2228,8 +2517,7 @@ impl File {
     ///
     /// file = file.post(auth.clone())?;
     /// ```
-    pub fn post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-
+    pub fn post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
         let mut form = self.to_multipart_form();
 
         let request = reqwest::blocking::Client::new()
@@ -2238,31 +2526,32 @@ impl File {
             .multipart(form)
             .send()?;
 
-
-
         let json = request.json::<Self>()?;
         return Ok(json);
     }
 
     /// Retrieves the dispute with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the dispute you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let dispute = payup::stripe::Dispute::get(auth, "ch_")?;
+    /// let dispute = justpaystripe::stripe::Dispute::get(auth, "ch_")?;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/files/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
@@ -2271,25 +2560,25 @@ impl File {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let charges = payup::stripe::Dispute::list(auth)?;
+    /// let charges = justpaystripe::stripe::Dispute::list(auth)?;
     /// ```
-    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk(creds.clone(), starting_after)?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -2298,28 +2587,43 @@ impl File {
         return Ok(objects);
     }
 
-
     fn list_chunk(creds: Auth, starting_after: Option<String>) -> Result<Files, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/files".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/files?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/files?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<Files>()?;
         return Ok(json);
     }
 
-    async fn list_chunk_async(creds: Auth, starting_after: Option<String>) -> Result<Files, reqwest::Error> {
+    async fn list_chunk_async(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<Files, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/files".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/files?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/files?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
 
         let json = request.json::<Files>().await?;
         return Ok(json);
@@ -2328,57 +2632,45 @@ impl File {
     fn to_multipart_form(&self) -> reqwest::blocking::multipart::Form {
         let mut form = reqwest::blocking::multipart::Form::new();
 
-        match &self.purpose{
+        match &self.purpose {
             Some(purpose) => {
                 form = form.text("purpose", purpose.clone());
-            },
-            None => {
-         
             }
+            None => {}
         }
 
-        match &self.file{
+        match &self.file {
             Some(file) => {
                 let part = reqwest::blocking::multipart::Part::bytes(file.clone());
                 form = form.part("file", part);
-             
-            },
-            None => {
-             
             }
+            None => {}
         }
 
-        return form;    
+        return form;
     }
 
     async fn to_multipart_form_async(&self) -> reqwest::multipart::Form {
         let mut form = reqwest::multipart::Form::new();
 
-        match &self.purpose{
+        match &self.purpose {
             Some(purpose) => {
                 form = form.text("purpose", purpose.clone());
-            },
-            None => {
-         
             }
+            None => {}
         }
 
-        match &self.file{
+        match &self.file {
             Some(file) => {
                 let part = reqwest::multipart::Part::bytes(file.clone());
                 form = form.part("file", part);
-             
-            },
-            None => {
-             
             }
+            None => {}
         }
 
-        return form;    
+        return form;
     }
-
 }
-
 
 /// To share the contents of a File object with non-Stripe users, you can create a FileLink
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2393,16 +2685,15 @@ pub struct FileLink {
     pub file: Option<String>,
     pub livemode: Option<bool>,
     // pub metadata: Metadata,
-    pub url: Option<String>
+    pub url: Option<String>,
 }
 impl FileLink {
-
     /// Returns an empty FileLink object
     ///
     /// # Examples
     ///
     /// ```
-    /// let mut file_link = payup::stripe::FileLink::new();
+    /// let mut file_link = justpaystripe::stripe::FileLink::new();
     /// file_link.file = Some(format!("file_"));
     /// ```
     pub fn new() -> Self {
@@ -2415,30 +2706,33 @@ impl FileLink {
             link_expires_at: None,
             file: None,
             livemode: None,
-            url: None
+            url: None,
         };
     }
 
-
     /// Asynchronously retrieves a file link with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the file you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let file = payup::stripe::FileLink::async_get(auth, "link_").await?;
+    /// let file = justpaystripe::stripe::FileLink::async_get(auth, "link_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
@@ -2447,25 +2741,25 @@ impl FileLink {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let file_links = payup::stripe::FileLink::async_list(auth).await?;
+    /// let file_links = justpaystripe::stripe::FileLink::async_list(auth).await?;
     /// ```
-    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub async fn async_list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk_async(creds.clone(), starting_after).await?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -2479,20 +2773,21 @@ impl FileLink {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut file_link = payup::stripe::FileLink::new();
+    /// let mut file_link = justpaystripe::stripe::FileLink::new();
     /// file_link.file = Some(format!("file_"));
     /// file_link.link_expires_at = Some(format!("1643341848"));
     ///
     /// file_link = file_link.async_post(auth.clone()).await?;
     /// ```
-    pub async fn async_post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
+    pub async fn async_post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
         let request = reqwest::Client::new()
             .post("https://api.stripe.com/v1/file_links")
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
-            .send().await?;
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
@@ -2503,9 +2798,9 @@ impl FileLink {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut file_link = payup::stripe::FileLink::new();
+    /// let mut file_link = justpaystripe::stripe::FileLink::new();
     /// file_link.file = Some(format!("file_"));
     ///
     /// file_link = file_link.async_post(auth.clone()).await?;
@@ -2513,35 +2808,43 @@ impl FileLink {
     /// file_link.link_expires_at = Some(format!("1643341848"));
     /// file_link = file_link.async_update(auth.clone()).await?;
     /// ```
-    pub async fn async_update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::Client::new().post(format!("https://api.stripe.com/v1/file_links/{}", self.clone().id.unwrap()))
+    pub async fn async_update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/file_links/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
-            .send().await?;
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
     /// Retrieves a file link with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the FileLink you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let file_link = payup::stripe::FileLink::get(auth, "ch_");
+    /// let file_link = justpaystripe::stripe::FileLink::get(auth, "ch_");
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
@@ -2550,25 +2853,25 @@ impl FileLink {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let file_links = payup::stripe::FileLink::list(auth)?;
+    /// let file_links = justpaystripe::stripe::FileLink::list(auth)?;
     /// ```
-    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error>{
+    pub fn list(creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk(creds.clone(), starting_after)?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -2582,15 +2885,15 @@ impl FileLink {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut file_link = payup::stripe::FileLink::new();
+    /// let mut file_link = justpaystripe::stripe::FileLink::new();
     /// file_link.file = Some(format!("file_"));
     /// file_link.link_expires_at = Some(format!("1643341848"));
     ///
     /// file_link = file_link.async_post(auth.clone())?;
     /// ```
-    pub fn post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
+    pub fn post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
         let request = reqwest::blocking::Client::new()
             .post("https://api.stripe.com/v1/file_links")
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -2606,9 +2909,9 @@ impl FileLink {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut file_link = payup::stripe::FileLink::new();
+    /// let mut file_link = justpaystripe::stripe::FileLink::new();
     /// file_link.file = Some(format!("file_"));
     ///
     /// file_link = file_link.post(auth.clone())?;
@@ -2616,8 +2919,12 @@ impl FileLink {
     /// file_link.link_expires_at = Some(format!("1643341848"));
     /// file_link = file_link.update(auth.clone())?;
     /// ```
-    pub fn update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post(format!("https://api.stripe.com/v1/file_links/{}", self.clone().id.unwrap()))
+    pub fn update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/file_links/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
             .send()?;
@@ -2626,27 +2933,46 @@ impl FileLink {
         return Ok(json);
     }
 
-    fn list_chunk(creds: Auth, starting_after: Option<String>) -> Result<FileLinks, reqwest::Error> {
+    fn list_chunk(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<FileLinks, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/file_links".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/file_links?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/file_links?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<FileLinks>()?;
         return Ok(json);
     }
 
-    async fn list_chunk_async(creds: Auth, starting_after: Option<String>) -> Result<FileLinks, reqwest::Error> {
+    async fn list_chunk_async(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<FileLinks, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/file_links".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/file_links?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/file_links?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
 
         let json = request.json::<FileLinks>().await?;
         return Ok(json);
@@ -2654,18 +2980,17 @@ impl FileLink {
 
     fn to_params(&self) -> Vec<(&str, &str)> {
         let mut params = vec![];
-        match &self.file{
+        match &self.file {
             Some(file) => params.push(("file", file.as_str())),
             None => {}
         }
-        match &self.link_expires_at{
+        match &self.link_expires_at {
             Some(link_expires_at) => params.push(("expires_at", link_expires_at.as_str())),
             None => {}
         }
 
         return params;
     }
-
 }
 
 // TODO - Finish Implementation
@@ -2775,7 +3100,7 @@ pub struct Invoice {
     // pub subscription: Value,
     pub subtotal: Option<i64>,
     pub subscription: Option<String>,
-    
+
     // pub tax: Value,
     pub total: Option<i64>,
     // #[serde(rename = "total_discount_amounts")]
@@ -2788,19 +3113,18 @@ pub struct Invoice {
     // pub webhooks_delivered_at: Value,
 }
 impl Invoice {
-
     /// Returns an empty Invoice object
     ///
     /// # Examples
     ///
     /// ```
-    /// let mut invoice = payup::stripe::Invoice::new();
+    /// let mut invoice = justpaystripe::stripe::Invoice::new();
     /// invoice.customer = Some(format!("cust_"));
     /// invoice.collection_method = Some(format!("charge_automatically"));
     /// invoice.auto_advance = Some(true);
     /// ```
     pub fn new() -> Self {
-        return Invoice{
+        return Invoice {
             id: None,
             object: None,
             account_country: None,
@@ -2845,29 +3169,33 @@ impl Invoice {
             starting_balance: None,
             status_transitions: None,
             subtotal: None,
-            total: None
+            total: None,
         };
     }
 
     /// Asynchronously retrieves the Invoice by the id.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the invoice you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let invoice = payup::stripe::Invoice::async_get(auth, "in_").await?;
+    /// let invoice = justpaystripe::stripe::Invoice::async_get(auth, "in_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/invoices/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
@@ -2876,7 +3204,7 @@ impl Invoice {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `status` - Ex: draft, open, paid, uncollectible, void (optional)
     /// * `customer` - Limit to invoices belonging to a Customer's id (optional)
     ///
@@ -2884,19 +3212,29 @@ impl Invoice {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let invoices = payup::stripe::Invoice::async_list(auth).await?;
+    /// let invoices = justpaystripe::stripe::Invoice::async_list(auth).await?;
     /// ```
-    pub async fn async_list(creds: Auth, status: Option<String>, customer: Option<String>) -> Result<Vec<Self>, reqwest::Error>{
+    pub async fn async_list(
+        creds: Auth,
+        status: Option<String>,
+        customer: Option<String>,
+    ) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
-            let json = Self::list_chunk_async(creds.clone(), starting_after, status.clone(), customer.clone()).await?;
-            for json_object in json.data{
+        while has_more {
+            let json = Self::list_chunk_async(
+                creds.clone(),
+                starting_after,
+                status.clone(),
+                customer.clone(),
+            )
+            .await?;
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -2910,20 +3248,21 @@ impl Invoice {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut invoice = payup::stripe::Invoice::new();
+    /// let mut invoice = justpaystripe::stripe::Invoice::new();
     /// invoice.customer = Some(format!("cust_"));
     /// invoice.collection_method = Some(format!("charge_automatically"));
     /// invoice.auto_advance = Some(true);
     /// invoice = invoice.async_post(auth).await?;
     /// ```
-    pub async fn async_post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
+    pub async fn async_post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
         let request = reqwest::Client::new()
             .post("https://api.stripe.com/v1/invoices")
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
-            .send().await?;
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
@@ -2934,9 +3273,9 @@ impl Invoice {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut invoice = payup::stripe::Invoice::new();
+    /// let mut invoice = justpaystripe::stripe::Invoice::new();
     /// invoice.customer = Some(format!("cust_"));
     /// invoice.collection_method = Some(format!("charge_automatically"));
     /// invoice.auto_advance = Some(false);
@@ -2945,35 +3284,43 @@ impl Invoice {
     /// invoice.auto_advance = Some(true);
     /// invoice = invoice.async_update(auth).await?;
     /// ```
-    pub async fn async_update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::Client::new().post(format!("https://api.stripe.com/v1/invoices/{}", self.clone().id.unwrap()))
+    pub async fn async_update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/invoices/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
-            .send().await?;
+            .send()
+            .await?;
 
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
     /// Retrieves the details of an Invoice by the id.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the invoice you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let invoice = payup::stripe::Invoice::get(auth, "in_");
+    /// let invoice = justpaystripe::stripe::Invoice::get(auth, "in_");
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/invoices/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
@@ -2982,7 +3329,7 @@ impl Invoice {
     ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `status` - Ex: draft, open, paid, uncollectible, void (optional)
     /// * `customer` - Limit to invoices belonging to a Customer's id (optional)
     ///
@@ -2990,19 +3337,28 @@ impl Invoice {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch all customers from stripe
-    /// let invoices = payup::stripe::Invoice::list(auth)?;
+    /// let invoices = justpaystripe::stripe::Invoice::list(auth)?;
     /// ```
-    pub fn list(creds: Auth, status: Option<String>, customer: Option<String>) -> Result<Vec<Self>, reqwest::Error>{
+    pub fn list(
+        creds: Auth,
+        status: Option<String>,
+        customer: Option<String>,
+    ) -> Result<Vec<Self>, reqwest::Error> {
         let mut objects: Vec<Self> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
-            let json = Self::list_chunk(creds.clone(), starting_after, status.clone(), customer.clone())?;
-            for json_object in json.data{
+        while has_more {
+            let json = Self::list_chunk(
+                creds.clone(),
+                starting_after,
+                status.clone(),
+                customer.clone(),
+            )?;
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -3016,15 +3372,15 @@ impl Invoice {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut invoice = payup::stripe::Invoice::new();
+    /// let mut invoice = justpaystripe::stripe::Invoice::new();
     /// invoice.customer = Some(format!("cust_"));
     /// invoice.collection_method = Some(format!("charge_automatically"));
     /// invoice.auto_advance = Some(true);
     /// invoice = invoice.post(auth)?;
     /// ```
-    pub fn post(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
+    pub fn post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
         let request = reqwest::blocking::Client::new()
             .post("https://api.stripe.com/v1/invoices")
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -3040,9 +3396,9 @@ impl Invoice {
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
-    /// let mut invoice = payup::stripe::Invoice::new();
+    /// let mut invoice = justpaystripe::stripe::Invoice::new();
     /// invoice.customer = Some(format!("cust_"));
     /// invoice.collection_method = Some(format!("charge_automatically"));
     /// invoice.auto_advance = Some(false);
@@ -3051,8 +3407,12 @@ impl Invoice {
     /// invoice.auto_advance = Some(true);
     /// invoice = invoice.update(auth)?;
     /// ```
-    pub fn update(&self, creds: Auth) ->  Result<Self, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post(format!("https://api.stripe.com/v1/invoices/{}", self.clone().id.unwrap()))
+    pub fn update(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/invoices/{}",
+                self.clone().id.unwrap()
+            ))
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
             .send()?;
@@ -3061,59 +3421,82 @@ impl Invoice {
         return Ok(json);
     }
 
-    fn list_chunk(creds: Auth, starting_after: Option<String>, status: Option<String>, customer: Option<String>) -> Result<Invoices, reqwest::Error> {
+    fn list_chunk(
+        creds: Auth,
+        starting_after: Option<String>,
+        status: Option<String>,
+        customer: Option<String>,
+    ) -> Result<Invoices, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/invoices".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/invoices?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/invoices?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        if status.is_some(){
-            if url.contains("?"){
+        if status.is_some() {
+            if url.contains("?") {
                 url = format!("{}{}={}", url, "&status", status.unwrap());
             } else {
                 url = format!("{}{}={}", url, "?status", status.unwrap());
             }
         }
 
-        if customer.is_some(){
-            if url.contains("?"){
+        if customer.is_some() {
+            if url.contains("?") {
                 url = format!("{}{}={}", url, "&customer", customer.unwrap());
             } else {
                 url = format!("{}{}={}", url, "?customer", customer.unwrap());
             }
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<Invoices>()?;
         return Ok(json);
     }
 
-    async fn list_chunk_async(creds: Auth, starting_after: Option<String>, status: Option<String>, customer: Option<String>) -> Result<Invoices, reqwest::Error> {
+    async fn list_chunk_async(
+        creds: Auth,
+        starting_after: Option<String>,
+        status: Option<String>,
+        customer: Option<String>,
+    ) -> Result<Invoices, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/invoices".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/invoices?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/invoices?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        if status.is_some(){
-            if url.contains("?"){
+        if status.is_some() {
+            if url.contains("?") {
                 url = format!("{}{}={}", url, "&status", status.unwrap());
             } else {
                 url = format!("{}{}={}", url, "?status", status.unwrap());
             }
         }
 
-        if customer.is_some(){
-            if url.contains("?"){
+        if customer.is_some() {
+            if url.contains("?") {
                 url = format!("{}{}={}", url, "&customer", customer.unwrap());
             } else {
                 url = format!("{}{}={}", url, "?customer", customer.unwrap());
             }
         }
 
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
 
         let json = request.json::<Invoices>().await?;
         return Ok(json);
@@ -3121,7 +3504,7 @@ impl Invoice {
 
     fn to_params(&self) -> Vec<(&str, &str)> {
         let mut params = vec![];
-        match &self.customer{
+        match &self.customer {
             Some(customer) => params.push(("customer", customer.as_str())),
             None => {}
         }
@@ -3129,11 +3512,13 @@ impl Invoice {
         //     Some(auto_advance) => params.push(("auto_advance", auto_advance.as_str())),
         //     None => {}
         // }
-        match &self.collection_method{
-            Some(collection_method) => params.push(("collection_method", collection_method.as_str())),
+        match &self.collection_method {
+            Some(collection_method) => {
+                params.push(("collection_method", collection_method.as_str()))
+            }
             None => {}
         }
-        match &self.description{
+        match &self.description {
             Some(description) => params.push(("description", description.as_str())),
             None => {}
         }
@@ -3142,14 +3527,13 @@ impl Invoice {
         //     None => {}
         // }
 
-        match &self.subscription{
+        match &self.subscription {
             Some(subscription) => params.push(("subscription", subscription.as_str())),
             None => {}
         }
 
         return params;
     }
-
 }
 
 /// A Mandate is a record of the permission a customer has given you to debit their payment method.
@@ -3172,56 +3556,58 @@ pub struct Mandate {
 }
 impl Mandate {
     /// Asynchronously retrieves a Mandate with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the Mandate you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let file = payup::stripe::Mandate::async_get(auth, "mandate_").await?;
+    /// let file = justpaystripe::stripe::Mandate::async_get(auth, "mandate_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<Self>().await?;
         return Ok(json);
     }
 
-
     /// Retrieves a Mandate with the given ID.
-    /// 
+    ///
     /// # Arguments
     ///
-    /// * `auth` - payup::stripe::Auth::new(client, secret)
+    /// * `auth` - justpaystripe::stripe::Auth::new(client, secret)
     /// * `id` - The id of the Mandate you want to retrieve.
     ///
     /// # Examples
     ///
     /// ```
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
     ///
     /// // Fetch customer using id
-    /// let mandate = payup::stripe::Mandate::get(auth, "mandate_")?;
+    /// let mandate = justpaystripe::stripe::Mandate::get(auth, "mandate_")?;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
         let json = request.json::<Self>()?;
         return Ok(json);
     }
 }
-
-
-
-
 
 // TODO - Finish Implementation
 /// PaymentMethod objects represent your customer's payment instruments.
@@ -3231,7 +3617,7 @@ pub struct PaymentMethod {
     pub method_type: Option<String>,
     pub created: Option<String>,
     pub customer: Option<String>,
-    pub livemode:  Option<bool>,
+    pub livemode: Option<bool>,
     pub name: Option<String>,
     pub phone: Option<String>,
     pub billing_details: Option<crate::stripe::response::BillingDetails>,
@@ -3240,113 +3626,114 @@ pub struct PaymentMethod {
 }
 impl PaymentMethod {
     pub fn new() -> Self {
-        return PaymentMethod{
-            id: None, 
-            method_type: None, 
-            created: None, 
-            customer: None, 
-            livemode: None, 
+        return PaymentMethod {
+            id: None,
+            method_type: None,
+            created: None,
+            customer: None,
+            livemode: None,
             name: None,
             phone: None,
-            billing_details: None, 
+            billing_details: None,
             card: None,
-            type_field: None
+            type_field: None,
         };
     }
-    pub fn attach(&self, customer: Customer, creds: Auth) ->  Result<bool, reqwest::Error>{
+    pub fn attach(&self, customer: Customer, creds: Auth) -> Result<bool, reqwest::Error> {
+        match &self.id {
+            Some(id) => match &customer.id {
+                Some(cust_id) => {
+                    let url = format!(
+                        "https://api.stripe.com/v1/payment_methods/{}/attach",
+                        id.clone()
+                    );
 
-        match &self.id{
-            Some(id) => {
-
-                match &customer.id{
-                    Some(cust_id) => {
-  
-                        let url = format!("https://api.stripe.com/v1/payment_methods/{}/attach", id.clone());
-
-                
-                        let params = [
-                            ("customer", cust_id.as_str())
-                        ];
-                        let request = reqwest::blocking::Client::new().post(url)
+                    let params = [("customer", cust_id.as_str())];
+                    let request = reqwest::blocking::Client::new()
+                        .post(url)
                         .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
                         .form(&params)
                         .send()?;
-                        return Ok(true);
-                    },
-                    None => return Ok(false)
+                    return Ok(true);
                 }
-            
+                None => return Ok(false),
             },
-            None => return Ok(false)
+            None => return Ok(false),
         }
 
         return Ok(false);
     }
-    pub fn get(creds: Auth, id: String) -> Result<crate::stripe::response::PaymentMethod, reqwest::Error> {
+    pub fn get(
+        creds: Auth,
+        id: String,
+    ) -> Result<crate::stripe::response::PaymentMethod, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/payment_methods/{}", id.clone());
-        
-        let request = reqwest::blocking::Client::new().get(url)
-        .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-        .send();
-        match request{
+
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send();
+        match request {
             Ok(req) => {
-                let json = req.json::<crate::stripe::response::PaymentMethod>().unwrap();
+                let json = req
+                    .json::<crate::stripe::response::PaymentMethod>()
+                    .unwrap();
                 return Ok(json);
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
-    pub fn post(&self, creds: Auth) ->  Result<PaymentMethod, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post("https://api.stripe.com/v1/payment_methods")
-        .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-        .form(&self.to_params())
-        .send();
+    pub fn post(&self, creds: Auth) -> Result<PaymentMethod, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post("https://api.stripe.com/v1/payment_methods")
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .form(&self.to_params())
+            .send();
 
-        match request{
+        match request {
             Ok(req) => {
                 let mut plan = self.clone();
                 let json = req.json::<crate::stripe::response::PaymentMethod>()?;
                 plan.id = Some(json.id);
                 Ok(plan)
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
     fn to_params(&self) -> Vec<(&str, &str)> {
         // return Customer{client, secret};
         let mut params = vec![];
-        match &self.method_type{
+        match &self.method_type {
             Some(method_type) => params.push(("type", method_type.as_str())),
             None => {}
         }
-        match &self.card{
+        match &self.card {
             Some(card) => {
-                match &card.number{
+                match &card.number {
                     Some(number) => params.push(("card[number]", number.as_str())),
                     None => {}
                 }
-                match &card.exp_month{
+                match &card.exp_month {
                     Some(exp_month) => params.push(("card[exp_month]", exp_month.as_str())),
                     None => {}
                 }
-                match &card.exp_year{
+                match &card.exp_year {
                     Some(exp_year) => params.push(("card[exp_year]", exp_year.as_str())),
                     None => {}
                 }
-                match &card.cvc{
+                match &card.cvc {
                     Some(cvc) => params.push(("card[cvc]", cvc.as_str())),
                     None => {}
                 }
-            },
+            }
             None => {}
         }
         return params;
     }
 }
 
-
 // TODO - Finish Implementation
-/// Plans define the base price, currency, and billing cycle for recurring purchases of products. 
+/// Plans define the base price, currency, and billing cycle for recurring purchases of products.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Plan {
     pub id: Option<String>,
@@ -3361,46 +3748,61 @@ pub struct Plan {
     pub product: Option<String>,
 }
 impl Plan {
-
     pub fn new() -> Self {
         return Plan {
-            id: None, 
-            active: None, 
-            amount: None, 
-            amount_decimal: None, 
-            billing_scheme: None, 
-            created: None, 
-            currency: None, 
-            interval: None, 
+            id: None,
+            active: None,
+            amount: None,
+            amount_decimal: None,
+            billing_scheme: None,
+            created: None,
+            currency: None,
+            interval: None,
             interval_count: None,
-            product: None
+            product: None,
         };
     }
 
-    pub async fn async_delete(creds: Auth, id: String) -> Result<crate::stripe::response::Plan, reqwest::Error> {
+    pub async fn async_delete(
+        creds: Auth,
+        id: String,
+    ) -> Result<crate::stripe::response::Plan, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
-        
-        let request = reqwest::Client::new().delete(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+
+        let request = reqwest::Client::new()
+            .delete(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
 
         let json = request.json::<crate::stripe::response::Plan>().await?;
         return Ok(json);
     }
 
-    pub async fn async_get(auth: Auth, id: String) -> Result<crate::stripe::response::Plan, reqwest::Error> {
+    pub async fn async_get(
+        auth: Auth,
+        id: String,
+    ) -> Result<crate::stripe::response::Plan, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
-        let request = reqwest::Client::new().get(url).basic_auth(auth.client.as_str(), Some(auth.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(auth.client.as_str(), Some(auth.secret.as_str()))
+            .send()
+            .await?;
         let json = request.json::<crate::stripe::response::Plan>().await?;
         return Ok(json);
     }
 
-    pub async fn async_list(creds: Auth) -> Result<Vec<crate::stripe::response::Plan>, reqwest::Error>{
+    pub async fn async_list(
+        creds: Auth,
+    ) -> Result<Vec<crate::stripe::response::Plan>, reqwest::Error> {
         let mut objects: Vec<crate::stripe::response::Plan> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk_async(creds.clone(), starting_after).await?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -3410,41 +3812,54 @@ impl Plan {
         return Ok(objects);
     }
 
-    pub async fn async_post(&self, creds: Auth) ->  Result<crate::stripe::response::Plan, reqwest::Error> {
-        let request = reqwest::Client::new().post("https://api.stripe.com/v1/plans")
-        .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-        .form(&self.to_params())
-        .send().await?;
+    pub async fn async_post(
+        &self,
+        creds: Auth,
+    ) -> Result<crate::stripe::response::Plan, reqwest::Error> {
+        let request = reqwest::Client::new()
+            .post("https://api.stripe.com/v1/plans")
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .form(&self.to_params())
+            .send()
+            .await?;
 
         let json = request.json::<crate::stripe::response::Plan>().await?;
         return Ok(json);
     }
 
-    pub fn delete(creds: Auth, id: String) -> Result<crate::stripe::response::Plan, reqwest::Error> {
+    pub fn delete(
+        creds: Auth,
+        id: String,
+    ) -> Result<crate::stripe::response::Plan, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
-        
-        let request = reqwest::blocking::Client::new().delete(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+
+        let request = reqwest::blocking::Client::new()
+            .delete(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<crate::stripe::response::Plan>()?;
         return Ok(json);
     }
-
 
     pub fn get(auth: Auth, id: String) -> Result<crate::stripe::response::Plan, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(auth.client.as_str(), Some(auth.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(auth.client.as_str(), Some(auth.secret.as_str()))
+            .send()?;
         let json = request.json::<crate::stripe::response::Plan>()?;
         return Ok(json);
     }
 
-    pub fn list(creds: Auth) -> Result<Vec<crate::stripe::response::Plan>, reqwest::Error>{
+    pub fn list(creds: Auth) -> Result<Vec<crate::stripe::response::Plan>, reqwest::Error> {
         let mut objects: Vec<crate::stripe::response::Plan> = Vec::new();
 
         let mut has_more = true;
         let mut starting_after: Option<String> = None;
-        while has_more{
+        while has_more {
             let json = Self::list_chunk(creds.clone(), starting_after)?;
-            for json_object in json.data{
+            for json_object in json.data {
                 objects.push(json_object);
             }
             has_more = json.has_more;
@@ -3454,8 +3869,9 @@ impl Plan {
         return Ok(objects);
     }
 
-    pub fn post(&self, creds: Auth) ->  Result<crate::stripe::response::Plan, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post("https://api.stripe.com/v1/plans")
+    pub fn post(&self, creds: Auth) -> Result<crate::stripe::response::Plan, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post("https://api.stripe.com/v1/plans")
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
             .send()?;
@@ -3464,27 +3880,46 @@ impl Plan {
         return Ok(json);
     }
 
-    fn list_chunk(creds: Auth, starting_after: Option<String>) -> Result<crate::stripe::response::Plans, reqwest::Error> {
+    fn list_chunk(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<crate::stripe::response::Plans, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/plans".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/plans?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/plans?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::blocking::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send()?;
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()?;
 
         let json = request.json::<crate::stripe::response::Plans>()?;
         return Ok(json);
     }
 
-    async fn list_chunk_async(creds: Auth, starting_after: Option<String>) -> Result<crate::stripe::response::Plans, reqwest::Error> {
+    async fn list_chunk_async(
+        creds: Auth,
+        starting_after: Option<String>,
+    ) -> Result<crate::stripe::response::Plans, reqwest::Error> {
         let mut url = "https://api.stripe.com/v1/plans".to_string();
 
         if starting_after.is_some() {
-            url = format!("https://api.stripe.com/v1/plans?starting_after={}", starting_after.unwrap());
+            url = format!(
+                "https://api.stripe.com/v1/plans?starting_after={}",
+                starting_after.unwrap()
+            );
         }
 
-        let request = reqwest::Client::new().get(url).basic_auth(creds.client.as_str(), Some(creds.secret.as_str())).send().await?;
+        let request = reqwest::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send()
+            .await?;
 
         let json = request.json::<crate::stripe::response::Plans>().await?;
         return Ok(json);
@@ -3493,23 +3928,23 @@ impl Plan {
     fn to_params(&self) -> Vec<(&str, &str)> {
         // return Customer{client, secret};
         let mut params = vec![];
-        match &self.amount{
+        match &self.amount {
             Some(amount) => params.push(("amount", amount.as_str())),
             None => {}
         }
-        match &self.currency{
+        match &self.currency {
             Some(currency) => params.push(("currency", currency.as_str())),
             None => {}
         }
-        match &self.interval{
+        match &self.interval {
             Some(interval) => params.push(("interval", interval.as_str())),
             None => {}
         }
-        match &self.product{
+        match &self.product {
             Some(product) => params.push(("product", product.as_str())),
             None => {}
         }
-        match &self.active{
+        match &self.active {
             Some(active) => params.push(("active", active.as_str())),
             None => {}
         }
@@ -3517,9 +3952,8 @@ impl Plan {
     }
 }
 
-
 // TODO - Finish Implementation
-/// Prices define the unit cost, currency, and (optional) billing cycle. 
+/// Prices define the unit cost, currency, and (optional) billing cycle.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Price {
     pub id: Option<String>,
@@ -3536,7 +3970,7 @@ pub struct Price {
 }
 impl Price {
     pub fn new() -> Self {
-        return Price{
+        return Price {
             id: None,
             active: None,
             billing_scheme: None,
@@ -3547,33 +3981,34 @@ impl Price {
             tax_behavior: None,
             type_field: None,
             unit_amount: None,
-            unit_amount_decimal: None
+            unit_amount_decimal: None,
         };
     }
-    pub fn post(&self, creds: Auth) ->  Result<Price, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post("https://api.stripe.com/v1/prices")
-        .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-        .form(&self.to_params())
-        .send();
+    pub fn post(&self, creds: Auth) -> Result<Price, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post("https://api.stripe.com/v1/prices")
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .form(&self.to_params())
+            .send();
 
-        match request{
+        match request {
             Ok(req) => {
                 let mut plan = self.clone();
                 let json = req.json::<crate::stripe::response::Price>()?;
                 plan.id = Some(json.id);
                 Ok(plan)
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
     fn to_params(&self) -> Vec<(&str, &str)> {
         // return Customer{client, secret};
         let mut params = vec![];
-        match &self.currency{
+        match &self.currency {
             Some(currency) => params.push(("currency", currency.as_str())),
             None => {}
         }
-        match &self.unit_amount{
+        match &self.unit_amount {
             Some(unit_amount) => params.push(("unit_amount", unit_amount.as_str())),
             None => {}
         }
@@ -3582,8 +4017,6 @@ impl Price {
 
         return params;
     }
-
- 
 }
 
 // TODO - Finish Implementation
@@ -3608,20 +4041,19 @@ pub struct Subscription {
     pub quantity: Option<i64>,
     pub start_date: Option<i64>,
     pub status: Option<String>,
-    pub price_items: Option<Vec<String>>
+    pub price_items: Option<Vec<String>>,
 }
 impl Subscription {
     pub fn new() -> Self {
-      
-        return Subscription{
-            id: None, 
-            billing_cycle_anchor: None, 
-            cancel_at: None, 
-            cancel_at_period_end: None, 
-            canceled_at: None, 
+        return Subscription {
+            id: None,
+            billing_cycle_anchor: None,
+            cancel_at: None,
+            cancel_at_period_end: None,
+            canceled_at: None,
             collection_method: None,
             created: None,
-            current_period_end: None, 
+            current_period_end: None,
             current_period_start: None,
             customer: None,
             price_items: None,
@@ -3632,21 +4064,25 @@ impl Subscription {
             livemode: None,
             quantity: None,
             start_date: None,
-            status: None
+            status: None,
         };
     }
-    pub fn cancel(creds: Auth, id: String) -> Result<crate::stripe::response::Subscription, reqwest::Error> {
+    pub fn cancel(
+        creds: Auth,
+        id: String,
+    ) -> Result<crate::stripe::response::Subscription, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/subscriptions/{}", id.clone());
-        
-        let request = reqwest::blocking::Client::new().delete(url)
-        .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-        .send();
-        match request{
+
+        let request = reqwest::blocking::Client::new()
+            .delete(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send();
+        match request {
             Ok(req) => {
                 let json = req.json::<crate::stripe::response::Subscription>().unwrap();
                 return Ok(json);
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
 
@@ -3665,44 +4101,56 @@ impl Subscription {
     /// let client = format!("sk_test_51Jo2sKGrEH09RU9uu8d8ARKasYUKHXAHk4vUNup1JLgP5wFnQQf6t7UpKfh7woVMhI9oeuziolW2dK1uwmgAheVI00bN8ews6g");
     /// let secret = format!("");
     /// // Create the Authentication refererence
-    /// let auth = payup::stripe::Auth::new(client, secret);
-    /// 
-    /// let get_subscription = payup::stripe::Subscription::get(auth, "subscription_id");
+    /// let auth = justpaystripe::stripe::Auth::new(client, secret);
+    ///
+    /// let get_subscription = justpaystripe::stripe::Subscription::get(auth, "subscription_id");
     /// ```
-    pub fn get(creds: Auth, id: String) -> Result<crate::stripe::response::Subscription, reqwest::Error> {
+    pub fn get(
+        creds: Auth,
+        id: String,
+    ) -> Result<crate::stripe::response::Subscription, reqwest::Error> {
         let mut url = format!("https://api.stripe.com/v1/subscriptions/{}", id.clone());
-        
-        let request = reqwest::blocking::Client::new().get(url)
-        .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-        .send();
-        match request{
+
+        let request = reqwest::blocking::Client::new()
+            .get(url)
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .send();
+        match request {
             Ok(req) => {
                 let json = req.json::<crate::stripe::response::Subscription>().unwrap();
                 return Ok(json);
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
-    pub fn update(&self, creds: Auth) ->  Result<crate::stripe::response::Subscription, reqwest::Error> {
-        let request = reqwest::blocking::Client::new().post(format!("https://api.stripe.com/v1/subscriptions/{}", self.clone().id.unwrap()))
-        .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
-        .form(&self.to_params())
-        .send();
+    pub fn update(
+        &self,
+        creds: Auth,
+    ) -> Result<crate::stripe::response::Subscription, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post(format!(
+                "https://api.stripe.com/v1/subscriptions/{}",
+                self.clone().id.unwrap()
+            ))
+            .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
+            .form(&self.to_params())
+            .send();
 
-        match request{
+        match request {
             Ok(req) => {
                 let json = req.json::<crate::stripe::response::Subscription>()?;
                 Ok(json)
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
-    pub fn post(&self, creds: Auth) -> Result<Subscription, reqwest::Error>{
-        let request = reqwest::blocking::Client::new().post("https://api.stripe.com/v1/subscriptions")
+    pub fn post(&self, creds: Auth) -> Result<Subscription, reqwest::Error> {
+        let request = reqwest::blocking::Client::new()
+            .post("https://api.stripe.com/v1/subscriptions")
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
             .form(&self.to_params())
             .send()?;
-    
+
         let json = request.json::<Subscription>()?;
         Ok(json)
     }
@@ -3710,46 +4158,36 @@ impl Subscription {
     fn to_params(&self) -> Vec<(&str, &str)> {
         // return Customer{client, secret};
         let mut params = vec![];
-        match &self.customer{
+        match &self.customer {
             Some(customer) => params.push(("customer", customer.as_str())),
             None => {}
         }
 
-        match &self.default_payment_method{
-            Some(default_payment_method) => params.push(("default_payment_method", default_payment_method.as_str())),
+        match &self.default_payment_method {
+            Some(default_payment_method) => {
+                params.push(("default_payment_method", default_payment_method.as_str()))
+            }
             None => {}
         }
 
-        match &self.price_items{
-
+        match &self.price_items {
             Some(price_items) => {
-
-
                 let mut ii = 0;
-                for (item) in price_items{
-                    if ii < 20{
-                        if ii == 0{
+                for (item) in price_items {
+                    if ii < 20 {
+                        if ii == 0 {
                             params.push(("items[0][price]", item.as_str()));
                         }
-                        ii+=1;
+                        ii += 1;
                     }
                 }
-
-            },
+            }
             None => {}
-
         }
 
-
-   
-     
         return params;
     }
-
- 
 }
-
-
 
 // =====================================================================================
 // All structs below this point are just used to support the implimented structs above
@@ -3793,7 +4231,6 @@ pub struct BalanceTransactions {
     pub url: String,
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[doc(hidden)]
@@ -3831,8 +4268,7 @@ pub struct PaymentMethodDetails {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[doc(hidden)]
-pub struct FraudDetails {
-}
+pub struct FraudDetails {}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -3856,7 +4292,6 @@ pub struct Address {
     pub postal_code: Option<String>,
     pub state: Option<String>,
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -3951,7 +4386,7 @@ pub struct Evidence {
 }
 impl Evidence {
     pub fn new() -> Self {
-        return Evidence{
+        return Evidence {
             access_activity_log: None,
             billing_address: None,
             cancellation_policy: None,
@@ -3978,7 +4413,7 @@ impl Evidence {
             shipping_documentation: None,
             shipping_tracking_number: None,
             uncategorized_file: None,
-            uncategorized_text: None
+            uncategorized_text: None,
         };
     }
 }
@@ -4061,7 +4496,6 @@ pub struct Invoices {
     pub data: Vec<Invoice>,
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 #[doc(hidden)]
@@ -4087,7 +4521,6 @@ pub struct Online {
 // #[serde(rename_all = "camelCase")]
 // pub struct MultiUse {
 // }
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]

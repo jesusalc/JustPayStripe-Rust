@@ -1,0 +1,20 @@
+.
+├── Cargo.toml
+├── .env
+├── src/
+│   ├── lib.rs
+│   ├── client.rs
+│   └── stripe/
+│       ├── mod.rs
+│       ├── charge.rs
+│       └── customer.rs
+├── tests/
+│   └── stripe_tests.rs
+├── examples/
+│   ├── server/
+│   │   └── main.rs      ← Actix Web server
+│   └── frontend/
+│       ├── index.html   ← Tailwind UI
+│       ├── main.js      ← RxJS logic
+│       └── index.ts     ← placeholder
+└── publish.sh

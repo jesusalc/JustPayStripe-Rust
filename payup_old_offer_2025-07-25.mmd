@@ -1,0 +1,33 @@
+graph TD
+  Start[Start: User Code]
+  Auth[Create Auth Object]
+  API[Call Stripe API via Reqwest]
+  Balance[Balance]
+  Charge[Charge]
+  Customer[Customer]
+  Dispute[Dispute]
+  Event[Event]
+  File[File]
+  FileLink[FileLink]
+  Invoice[Invoice]
+  PaymentMethod[PaymentMethod]
+  Plan[Plan]
+  Price[Price]
+  Subscription[Subscription]
+  Transaction[BalanceTransaction]
+
+  Start --> Auth
+  Auth --> API
+  API --> Balance
+  API --> Charge
+  API --> Customer
+  API --> Dispute
+  API --> Event
+  API --> File
+  API --> FileLink
+  API --> Invoice
+  API --> PaymentMethod
+  API --> Plan
+  API --> Price
+  API --> Subscription
+  API --> Transaction

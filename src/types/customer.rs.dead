@@ -1,0 +1,38 @@
+use serde::{Deserialize, Serialize};
+use super::*;
+
+#[derive(Debug, Deserialize)]
+pub struct StripeCustomer {
+    pub id: String,
+    pub email: Option<String>,
+}
+pub async fn create_customer(
+  client: &StripeClient,
+  kv: &KVStore,
+  user_id: &str,
+  email: &str,
+  description: Option<&str>,
+) -> Result<String, reqwest::Error> {
+  let kv_key = format!("stripe:user:{}", user_id);
+
+  if let Some(existing_id) = kv.get(&kv_key).await {
+      return Ok(existing_id);
+  }
+
+  let mut params = vec![
+      ("email", email),
+      ("metadata[userId]", user_id),
+  ];
+
+  if let Some(desc) = description {
+      params.push(("description", desc));
+  }
+
+  let customer: serde_json::Value = client
+      .post("https://api.stripe.com/v1/customers", params)
+      .await?;
+
+  let id = customer["id"].as_str().unwrap().to_string();
+  kv.set(&kv_key, id.clone()).await;
+  Ok(id)
+}

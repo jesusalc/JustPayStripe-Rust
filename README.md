@@ -94,12 +94,12 @@ I built this library due to a lack of synchronous payment libraries. Currently i
 
 Add the following line to your cargo.toml:
 ```
-payup = "0.1.45"
+justpaystripe = "0.1.45"
 ```
 
 Example:
 ```rust
-extern crate payup;
+extern crate justpaystripe;
 
 fn main() {
 
@@ -109,9 +109,9 @@ fn main() {
     let secret = format!("");
 
     // Create the Authentication refererence
-    let auth = payup::stripe::Auth::new(client, secret);
+    let auth = justpaystripe::stripe::Auth::new(client, secret);
 
-    let get_subscription = payup::stripe::Subscription::get(auth.clone(), "sub_1JpgYvGrEH09RU9ueB31tuQp".to_string());
+    let get_subscription = justpaystripe::stripe::Subscription::get(auth.clone(), "sub_1JpgYvGrEH09RU9ueB31tuQp".to_string());
     match get_subscription {
         Ok(sub) => {
             println!("SUBSCRIPTION_GET: {:?}", sub);
@@ -120,7 +120,7 @@ fn main() {
     }
 
 
-    let get_all_invoices = payup::stripe::Invoice::list(auth.clone(), None, None);
+    let get_all_invoices = justpaystripe::stripe::Invoice::list(auth.clone(), None, None);
     match get_all_invoices {
         Ok(sub) => {
             println!("ALL_INVOICES: {:?}", sub);
@@ -128,7 +128,7 @@ fn main() {
         Err(err) => println!("{}", err),
     }
 
-    let get_one_invoice = payup::stripe::Invoice::get(auth.clone(), "in_1KM0TcGrEH09RU9uKzfi8E4x".to_string());
+    let get_one_invoice = justpaystripe::stripe::Invoice::get(auth.clone(), "in_1KM0TcGrEH09RU9uKzfi8E4x".to_string());
     match get_one_invoice {
         Ok(sub) => {
             println!("SINGLE_INVOICE_GET: {:?}", sub);
@@ -138,7 +138,7 @@ fn main() {
 
 
     // Build a customer object
-    let mut cust = payup::stripe::Customer::new();
+    let mut cust = justpaystripe::stripe::Customer::new();
     cust.name = Some("Rust Test".to_string());
     cust.description = Some("A test customer from rust.".to_string());
     cust.phone = Some("333-333-3333".to_string());
@@ -151,7 +151,7 @@ fn main() {
     let cust_id = cust.id.clone().unwrap();
 
 
-    let get_cust = payup::stripe::Customer::get(auth.clone(), cust_id.clone());
+    let get_cust = justpaystripe::stripe::Customer::get(auth.clone(), cust_id.clone());
     match get_cust {
         Ok(sub) => {
             println!("CUST_GET: {:?}", sub.clone());
@@ -167,11 +167,11 @@ fn main() {
 
 
     // Fetch customers from stripe account
-    let customers = payup::stripe::Customer::list(auth.clone()).unwrap();
+    let customers = justpaystripe::stripe::Customer::list(auth.clone()).unwrap();
     // println!("customers: {:?}", customers);
 
     // Create a new plan
-    let mut np = payup::stripe::Plan::new();
+    let mut np = justpaystripe::stripe::Plan::new();
     np.amount = Some("200".to_string());
     np.currency = Some("usd".to_string());
     np.interval = Some("month".to_string());
@@ -179,18 +179,18 @@ fn main() {
     let new_plan = np.post(auth.clone()).unwrap();
 
     // Fetch plans from stripe account
-    let plans = payup::stripe::Plan::list(auth.clone());
+    let plans = justpaystripe::stripe::Plan::list(auth.clone());
     // println!("plans: {:?}", plans);
 
     // Create a new card
-    let mut card = payup::stripe::Card::new();
+    let mut card = justpaystripe::stripe::Card::new();
     card.number = Some(format!("4242424242424242"));
     card.exp_month = Some(format!("01"));
     card.exp_year = Some(format!("2023"));
     card.cvc = Some(format!("314"));
 
     // Create a payment method from the card
-    let mut payment_method = payup::stripe::PaymentMethod::new();
+    let mut payment_method = justpaystripe::stripe::PaymentMethod::new();
     payment_method.method_type = Some(format!("card"));
     payment_method.card = Some(card);
     payment_method = payment_method.post(auth.clone()).unwrap();
@@ -200,7 +200,7 @@ fn main() {
     let payment_method_id = payment_method.id.clone().unwrap();
 
 
-    let get_payment_method = payup::stripe::PaymentMethod::get(auth.clone(), payment_method_id.clone());
+    let get_payment_method = justpaystripe::stripe::PaymentMethod::get(auth.clone(), payment_method_id.clone());
     match get_payment_method {
         Ok(sub) => {
             println!("PAYMENT_METHOD_GET: {:?}", sub);
@@ -224,7 +224,7 @@ fn main() {
                 price_items.push(format!("price_1Jp6siGrEH09RU9u95Xp7soZ"));
 
                 // Subscript the customer to the new_plan.id....
-                let mut subscription = payup::stripe::Subscription::new();
+                let mut subscription = justpaystripe::stripe::Subscription::new();
                 subscription.customer = Some(cust_id.clone());
                 subscription.default_payment_method = Some(payment_method_id.clone());
                 subscription.price_items = Some(price_items);
@@ -233,7 +233,7 @@ fn main() {
                 println!("subscription: {:?}", subscription.clone());
 
 
-                let get_subscription = payup::stripe::Subscription::get(auth.clone(), subscription.clone().id.unwrap());
+                let get_subscription = justpaystripe::stripe::Subscription::get(auth.clone(), subscription.clone().id.unwrap());
                 match get_subscription {
                     Ok(sub) => {
                         println!("SUBSCRIPTION_GET: {:?}", sub);
@@ -243,16 +243,16 @@ fn main() {
 
 
 
-                let get_payment_methods = payup::stripe::Customer::payment_methods(auth.clone(), cust_id.clone(), format!("card"));
+                let get_payment_methods = justpaystripe::stripe::Customer::payment_methods(auth.clone(), cust_id.clone(), format!("card"));
          
     
 
-                let get_invoices = payup::stripe::Customer::invoices(auth.clone(), cust_id.clone());
+                let get_invoices = justpaystripe::stripe::Customer::invoices(auth.clone(), cust_id.clone());
                 println!("CUSTOMER_INVOICES: {:?}", get_invoices);
            
 
                 // Create a new card
-                let mut new_card = payup::stripe::Card::new();
+                let mut new_card = justpaystripe::stripe::Card::new();
                 new_card.number = Some(format!("4242424242424242"));
                 new_card.exp_month = Some(format!("01"));
                 new_card.exp_year = Some(format!("2023"));
@@ -260,7 +260,7 @@ fn main() {
 
 
                 // Change Payment Method
-                let mut new_payment_method = payup::stripe::PaymentMethod::new();
+                let mut new_payment_method = justpaystripe::stripe::PaymentMethod::new();
                 new_payment_method.method_type = Some(format!("card"));
                 new_payment_method.card = Some(new_card);
                 new_payment_method = new_payment_method.post(auth.clone()).unwrap();
@@ -269,14 +269,14 @@ fn main() {
                 let new_payment_method_id = payment_method.id.clone().unwrap();
                 
 
-                let mut new_subscription = payup::stripe::Subscription::new();
+                let mut new_subscription = justpaystripe::stripe::Subscription::new();
                 new_subscription.default_payment_method = Some(new_payment_method_id);
                 new_subscription.id = subscription.clone().id;
                 let nnew_subscription = new_subscription.update(auth.clone());
                 println!("new_subscription: {:?}", nnew_subscription);
 
 
-                let subscription_cancel = payup::stripe::Subscription::cancel(auth.clone(), format!("sub_1JpgYvGrEH09RU9ueB31tuQp")).unwrap();
+                let subscription_cancel = justpaystripe::stripe::Subscription::cancel(auth.clone(), format!("sub_1JpgYvGrEH09RU9ueB31tuQp")).unwrap();
                 println!("subscription_cancel: {:?}", subscription_cancel);
 
 
