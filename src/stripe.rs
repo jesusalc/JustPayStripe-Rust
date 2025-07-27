@@ -1,9 +1,9 @@
 pub mod response;
 
-use serde_json::json;
-
+// use serde_json::json;
+use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use std::convert::TryInto;
+// use std::convert::TryInto;
 
 // Full V1 API Support Complete
 /// Stores the Stripe API client + secret.
@@ -45,7 +45,7 @@ impl Balance {
     /// let balance = justpaystripe::stripe::Balance::async_get(auth).await;
     /// ```
     pub async fn async_get(creds: Auth) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/balance");
+        let url = format!("https://api.stripe.com/v1/balance");
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -71,7 +71,7 @@ impl Balance {
     /// let balance = justpaystripe::stripe::Balance::get(auth).await;
     /// ```
     pub fn get(creds: Auth) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/balance");
+        let url = format!("https://api.stripe.com/v1/balance");
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -125,7 +125,7 @@ impl BalanceTransaction {
     /// let balance_transaction = justpaystripe::stripe::BalanceTransaction::async_get(auth, "txn_").await;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!(
+        let url = format!(
             "https://api.stripe.com/v1/balance_transactions/{}",
             id.clone()
         );
@@ -186,7 +186,7 @@ impl BalanceTransaction {
     /// let balance_transaction = justpaystripe::stripe::BalanceTransaction::get(auth, "txn_").await;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!(
+        let url = format!(
             "https://api.stripe.com/v1/balance_transactions/{}",
             id.clone()
         );
@@ -313,7 +313,7 @@ pub struct Charge {
     pub id: Option<String>,
     pub object: Option<String>,
     pub amount: Option<String>,
-    #[serde(rename = "amount")]
+    // #[serde(rename = "amount")]
     pub stripe_amount: Option<i64>,
     #[serde(rename = "amount_captured")]
     pub amount_captured: Option<i64>,
@@ -485,7 +485,7 @@ impl Charge {
     /// let charge = justpaystripe::stripe::Charge::async_get(auth, "ch_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/charges/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/charges/{}", id.clone());
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -649,7 +649,7 @@ impl Charge {
     /// let charge = justpaystripe::stripe::Charge::get(auth, "ch_");
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/charges/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/charges/{}", id.clone());
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -840,7 +840,7 @@ impl Charge {
             Some(currency) => params.push(("currency", currency.as_str())),
             None => {}
         }
-        // TODO - Impliment Shipping
+        // TODO - Implement Shipping
         // match &self.shipping{
         //     Some(shipping) => params.push(("shipping", shipping.as_str())),
         //     None => {}
@@ -866,6 +866,47 @@ impl Charge {
     }
 }
 
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct CheckoutSession {
+    pub customer: Option<String>,
+    pub success_url: Option<String>,
+    pub cancel_url: Option<String>,
+    pub mode: Option<String>,
+    pub line_items: Option<Vec<LineItem>>,
+    pub url: Option<String>, // for response
+}
+impl CheckoutSession {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub async fn async_post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
+        let client = reqwest::Client::new();
+        let res = client
+            .post("https://api.stripe.com/v1/checkout/sessions")
+            .basic_auth(creds.client, Some(creds.secret))
+            .form(self)
+            .send()
+            .await?
+            .json::<Self>()
+            .await?;
+
+        Ok(res)
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct LineItem {
+    pub price: Option<String>,
+    pub quantity: Option<u32>,
+}
+impl LineItem {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
 /// Represents a customer of your business.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Customer {
@@ -883,6 +924,8 @@ pub struct Customer {
     pub description: Option<String>,
     // pub discount: Value,
     pub email: Option<String>,
+    pub metadata: Option<HashMap<String, String>>,
+
     #[serde(rename = "invoice_prefix")]
     pub invoice_prefix: Option<String>,
     // #[serde(rename = "invoice_settings")]
@@ -923,6 +966,7 @@ impl Customer {
             payment_method: None,
             delinquent: None,
             description: None,
+            metadata: None,
             email: None,
             invoice_prefix: None,
             livemode: None,
@@ -950,7 +994,7 @@ impl Customer {
     /// let customer = justpaystripe::stripe::Customer::async_delete(auth, "cust_").await?;
     /// ```
     pub async fn async_delete(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
 
         let request = reqwest::Client::new()
             .delete(url)
@@ -979,7 +1023,7 @@ impl Customer {
     /// let customer = justpaystripe::stripe::Customer::async_get(auth, "cust_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -1201,7 +1245,7 @@ impl Customer {
     /// let customer = justpaystripe::stripe::Customer::async_delete(auth, "cust_").await?;
     /// ```
     pub fn delete(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
 
         let request = reqwest::blocking::Client::new()
             .delete(url)
@@ -1229,7 +1273,7 @@ impl Customer {
     /// let customer = justpaystripe::stripe::Customer::get(auth, "cust_")?;
     /// ```
     pub fn get(auth: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/customers/{}", id.clone());
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(auth.client.as_str(), Some(auth.secret.as_str()))
@@ -1688,7 +1732,7 @@ impl Dispute {
     /// let dispute = justpaystripe::stripe::Dispute::async_get(auth, "ch_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/disputes/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/disputes/{}", id.clone());
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -1809,7 +1853,7 @@ impl Dispute {
     /// let dispute = justpaystripe::stripe::Dispute::get(auth, "ch_")?;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/disputes/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/disputes/{}", id.clone());
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -2224,7 +2268,7 @@ impl Event {
     /// let event = justpaystripe::stripe::Event::async_get(auth, "ch_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/events/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/events/{}", id.clone());
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -2282,7 +2326,7 @@ impl Event {
     /// let event = justpaystripe::stripe::Event::get(auth, "ch_")?;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/events/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/events/{}", id.clone());
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -2426,7 +2470,7 @@ impl File {
     /// let file = justpaystripe::stripe::File::async_get(auth, "ch_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/files/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/files/{}", id.clone());
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -2486,7 +2530,7 @@ impl File {
     /// file = file.post(auth.clone()).await?;
     /// ```
     pub async fn async_post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
-        let mut form = self.to_multipart_form_async().await;
+        let form = self.to_multipart_form_async().await;
 
         let request = reqwest::Client::new()
             .post("https://api.stripe.com/v1/files")
@@ -2518,7 +2562,7 @@ impl File {
     /// file = file.post(auth.clone())?;
     /// ```
     pub fn post(&self, creds: Auth) -> Result<Self, reqwest::Error> {
-        let mut form = self.to_multipart_form();
+        let form = self.to_multipart_form();
 
         let request = reqwest::blocking::Client::new()
             .post("https://api.stripe.com/v1/files")
@@ -2547,7 +2591,7 @@ impl File {
     /// let dispute = justpaystripe::stripe::Dispute::get(auth, "ch_")?;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/files/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/files/{}", id.clone());
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -2727,7 +2771,7 @@ impl FileLink {
     /// let file = justpaystripe::stripe::FileLink::async_get(auth, "link_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -2840,7 +2884,7 @@ impl FileLink {
     /// let file_link = justpaystripe::stripe::FileLink::get(auth, "ch_");
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -2849,7 +2893,7 @@ impl FileLink {
         return Ok(json);
     }
 
-    /// Eeturns all stripe FileLinks.
+    /// Returns all stripe FileLinks.
     ///
     /// # Arguments
     ///
@@ -3190,7 +3234,7 @@ impl Invoice {
     /// let invoice = justpaystripe::stripe::Invoice::async_get(auth, "in_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/invoices/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/invoices/{}", id.clone());
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -3316,7 +3360,7 @@ impl Invoice {
     /// let invoice = justpaystripe::stripe::Invoice::get(auth, "in_");
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/invoices/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/invoices/{}", id.clone());
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -3572,7 +3616,7 @@ impl Mandate {
     /// let file = justpaystripe::stripe::Mandate::async_get(auth, "mandate_").await?;
     /// ```
     pub async fn async_get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -3599,7 +3643,7 @@ impl Mandate {
     /// let mandate = justpaystripe::stripe::Mandate::get(auth, "mandate_")?;
     /// ```
     pub fn get(creds: Auth, id: String) -> Result<Self, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/file_links/{}", id.clone());
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
@@ -3649,7 +3693,7 @@ impl PaymentMethod {
                     );
 
                     let params = [("customer", cust_id.as_str())];
-                    let request = reqwest::blocking::Client::new()
+                    let _request = reqwest::blocking::Client::new()
                         .post(url)
                         .basic_auth(creds.client.as_str(), Some(creds.secret.as_str()))
                         .form(&params)
@@ -3661,13 +3705,13 @@ impl PaymentMethod {
             None => return Ok(false),
         }
 
-        return Ok(false);
+        // return Ok(false);
     }
     pub fn get(
         creds: Auth,
         id: String,
     ) -> Result<crate::stripe::response::PaymentMethod, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/payment_methods/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/payment_methods/{}", id.clone());
 
         let request = reqwest::blocking::Client::new()
             .get(url)
@@ -3767,7 +3811,7 @@ impl Plan {
         creds: Auth,
         id: String,
     ) -> Result<crate::stripe::response::Plan, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
 
         let request = reqwest::Client::new()
             .delete(url)
@@ -3783,7 +3827,7 @@ impl Plan {
         auth: Auth,
         id: String,
     ) -> Result<crate::stripe::response::Plan, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
         let request = reqwest::Client::new()
             .get(url)
             .basic_auth(auth.client.as_str(), Some(auth.secret.as_str()))
@@ -3831,7 +3875,7 @@ impl Plan {
         creds: Auth,
         id: String,
     ) -> Result<crate::stripe::response::Plan, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
 
         let request = reqwest::blocking::Client::new()
             .delete(url)
@@ -3843,7 +3887,7 @@ impl Plan {
     }
 
     pub fn get(auth: Auth, id: String) -> Result<crate::stripe::response::Plan, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/plans/{}", id.clone());
         let request = reqwest::blocking::Client::new()
             .get(url)
             .basic_auth(auth.client.as_str(), Some(auth.secret.as_str()))
@@ -4013,7 +4057,7 @@ impl Price {
             None => {}
         }
 
-        // TODO Impliment product
+        // TODO Implement product
 
         return params;
     }
@@ -4071,7 +4115,7 @@ impl Subscription {
         creds: Auth,
         id: String,
     ) -> Result<crate::stripe::response::Subscription, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/subscriptions/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/subscriptions/{}", id.clone());
 
         let request = reqwest::blocking::Client::new()
             .delete(url)
@@ -4109,7 +4153,7 @@ impl Subscription {
         creds: Auth,
         id: String,
     ) -> Result<crate::stripe::response::Subscription, reqwest::Error> {
-        let mut url = format!("https://api.stripe.com/v1/subscriptions/{}", id.clone());
+        let url = format!("https://api.stripe.com/v1/subscriptions/{}", id.clone());
 
         let request = reqwest::blocking::Client::new()
             .get(url)
@@ -4173,7 +4217,7 @@ impl Subscription {
         match &self.price_items {
             Some(price_items) => {
                 let mut ii = 0;
-                for (item) in price_items {
+                for item in price_items {
                     if ii < 20 {
                         if ii == 0 {
                             params.push(("items[0][price]", item.as_str()));
@@ -4186,6 +4230,28 @@ impl Subscription {
         }
 
         return params;
+    }
+}
+impl Subscription {
+    pub async fn list_for_customer(customer_id: &str, creds: Auth) -> Result<Vec<Self>, reqwest::Error> {
+        let url = format!("https://api.stripe.com/v1/subscriptions?customer={}", customer_id);
+        let client = reqwest::Client::new();
+        let res = client
+            .get(&url)
+            .basic_auth(creds.client, Some(creds.secret))
+            .send()
+            .await?
+            .json::<serde_json::Value>()
+            .await?;
+
+        let subs = res["data"]
+            .as_array()
+            .unwrap_or(&vec![])
+            .iter()
+            .map(|v| serde_json::from_value(v.clone()).unwrap())
+            .collect();
+
+        Ok(subs)
     }
 }
 

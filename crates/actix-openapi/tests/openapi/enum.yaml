@@ -1,0 +1,44 @@
+openapi: "3.0.3"
+info:
+  version: "1.0"
+  title: "Hello World API"
+paths:
+  /hello/{user}:
+    parameters:
+      - name: user
+        in: path
+        required: true
+        description: The name of the user to greet.
+        schema:
+          type: string
+    get:
+      operationId: greet_user
+      summary: Returns a greeting to the user!
+      description: Some detailed description
+      responses:
+        200:
+          description: Returns the greeting.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: "Enum container"
+                required:
+                  - strEnum
+                  - intEnum
+                properties:
+                  strEnum:
+                    type: string
+                    description: "String enum example"
+                    enum:
+                      [
+                        "First Variant",
+                        "Second variant $",
+                        "!123",
+                        'Hello, "World"',
+                        'Hello, \"World2\"!',
+                      ]
+                  intEnum:
+                    type: integer
+                    description: "Integer enum example"
+                    enum: [1, 2, 3]

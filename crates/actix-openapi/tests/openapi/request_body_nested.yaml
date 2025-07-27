@@ -1,0 +1,45 @@
+openapi: "3.0.3"
+info:
+  version: "1.0"
+  title: "Hello World API"
+paths:
+  /hello/{user}:
+    parameters:
+      - name: user
+        in: path
+        required: true
+        description: The name of the user to greet.
+        schema:
+          type: string
+
+    post:
+      operationId: greet_user
+      summary: Returns a greeting to the user!
+      description: Some detailed description
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - str
+                - obj
+              properties:
+                str:
+                  type: string
+                obj:
+                  type: object
+                  properties:
+                    foo:
+                      type: integer
+                      default: 1
+                    bar:
+                      type: number
+                      default: 0.1
+      responses:
+        200:
+          description: Returns the greeting.
+          content:
+            application/json:
+              schema:
+                type: string

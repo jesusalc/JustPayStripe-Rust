@@ -69,3 +69,23 @@ pub fn setup_logger() {
     error!("test");
     info!("Logger initialized");
 }
+
+
+pub fn print_help() {
+    let version = VERSION;
+    let this_script_relative_path = stdenv::args().next().unwrap_or_default();
+    let _this_script_absolute_path =
+        stdenv::current_exe().expect("Failed to get the current executable path");
+    let _call_from_absolute_path = stdenv::current_dir().expect("Failed to get the current directory");
+    let this_script_name = Path::new(&this_script_relative_path)
+        .file_name()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default()
+        .to_owned();
+    println!(
+        "{} <<{} version:{} Usage: {} ",
+        this_script_name, NAME, version, this_script_name
+    );
+    println!("{:?}.", DESCRIPTION);
+}

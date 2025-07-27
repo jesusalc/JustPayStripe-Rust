@@ -4,6 +4,9 @@
     "creds",
     "cust",
     "justpaystripe",
-    "stdenv"
+    "livemode",
+    "stdenv",
+    "uncollectible",
+    "utoipa"
   ]
 }

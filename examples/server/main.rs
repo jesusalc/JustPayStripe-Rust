@@ -1,7 +1,13 @@
 use actix_cors::Cors;
 use dotenvy::*;
 use justpaystripe::{
-    stripe::{Charge, Customer},
+    stripe::{
+        Auth,
+        Charge,
+        Customer,
+        CheckoutSession,
+        Subscription
+    },
     StripeClient,
 };
 mod logger;
@@ -19,7 +25,17 @@ use actix_web::{
     },
     // middleware::Logger,
     middleware::Logger as ActixLogger,
-    web,
+    // get,
+    // post,
+    web::{
+        self,
+        // get,
+        // post,
+        // option,
+        // delete,
+        // put,
+        // patch
+    },
     App,
     // HttpRequest,
     // rt::System
@@ -33,6 +49,10 @@ use env_logger::{Builder, Env};
 // use log::{error, info, warn, trace, debug, Record, Level, Metadata, LevelFilter, SetLoggerError, set_boxed_logger, set_max_level};
 use colored::*;
 use log::{debug, error, info, trace, warn};
+use serde::{Deserialize,
+    // Serialize
+};
+// use serde_json::{json, Value};
 use std::{
     // collections::{HashMap, HashSet},
     env as stdenv,
@@ -60,34 +80,65 @@ use std::{
         // Stdio
     },
     string::String as IOString,
+    sync::Arc,
     // sync::Mutex,
     vec::Vec as IOVec,
+    collections::HashMap,
+
 };
 
 use chrono::{
-    offset::{
-        TimeZone,
-        // Offset,
-    },
-    DateTime,
-    Datelike,
+    // offset::{
+    //     // TimeZone,
+    //     // Offset,
+    // },
+    // DateTime,
+    // Datelike,
     Local,
-    Duration,
+    // Duration,
     // FixedOffset,
     // Local,
 
     // Utc,
-    NaiveDate,
-    NaiveDateTime,
+    // NaiveDate,
+    // NaiveDateTime,
     // FixedOffset,
     // LocalResult,
     // TimeZone,
-    Utc,
+    // Utc,
 };
+use tokio::sync::Mutex;
+use once_cell::sync::Lazy;
+
+static KV: Lazy<KVStore> = Lazy::new(KVStore::new);
 
 const VERSION: &str = stdenv!("CARGO_PKG_VERSION");
 const DESCRIPTION: &str = stdenv!("CARGO_PKG_DESCRIPTION");
 const NAME: &str = stdenv!("CARGO_PKG_NAME");
+
+#[derive(Clone)]
+pub struct KVStore {
+    inner: Arc<Mutex<HashMap<String, String>>>,
+}
+
+impl KVStore {
+    pub fn new() -> Self {
+        Self {
+            inner: Arc::new(Mutex::new(HashMap::new())),
+        }
+    }
+
+    pub async fn set(&self, key: &str, value: String) {
+        let mut store = self.inner.lock().await;
+        store.insert(key.to_string(), value);
+    }
+
+    pub async fn get(&self, key: &str) -> Option<String> {
+        let store = self.inner.lock().await;
+        store.get(key).cloned()
+    }
+}
+
 
 async fn health() -> impl Responder {
     HttpResponse::Ok().body("OK")
@@ -109,8 +160,84 @@ async fn post_charge(item: web::Json<Charge>) -> impl Responder {
     }
 }
 
+
+#[derive(Deserialize)]
+struct User {
+    id: String,
+    email: String,
+}
+
+async fn generate_checkout(user: web::Json<User>) -> impl Responder {
+    let creds: Auth = StripeClient::new().into();
+
+    let kv = KV.clone();
+
+    // Step 1: lookup or create customer
+    let kv_key = format!("stripe:user:{}", user.id);
+    let customer_id = kv.get(&kv_key).await;
+
+    let customer_id = match customer_id {
+        Some(cid) => cid,
+        None => {
+            let mut customer = Customer::new();
+            customer.email = Some(user.email.clone());
+            customer.metadata = Some(HashMap::from([("userId".to_string(), user.id.clone())]));
+            let created = customer.async_post(creds.clone()).await.unwrap();
+            let customer_id = created.id.clone().expect("missing customer id");
+            kv.set(&kv_key, customer_id.clone()).await;
+
+            created.id.expect("missing customer id")
+        }
+    };
+
+    // Step 2: create checkout session
+    let mut session = CheckoutSession::new();
+    session.customer = Some(customer_id);
+    session.success_url = Some("http://localhost:3000/success".to_string());
+    session.cancel_url = Some("http://localhost:3000/cancel".to_string());
+    session.mode = Some("subscription".to_string());
+    session.line_items = Some(vec![{
+        let mut item = justpaystripe::stripe::LineItem::new();
+        item.price = Some("price_abc123".to_string());
+        item.quantity = Some(1);
+        item
+    }]);
+
+    let created_session = session.async_post(creds).await.unwrap();
+    HttpResponse::Ok().json(serde_json::json!({ "url": created_session.url }))
+}
+
+async fn success() -> impl Responder {
+    let user_id = "demo-user";
+    let kv = KV.clone();
+
+    let customer_id = kv.get(&format!("stripe:user:{user_id}")).await.unwrap();
+    let creds = StripeClient::new().into();
+
+    // Sync subscription state
+    let sub = Subscription::list_for_customer(&customer_id, creds).await.unwrap();
+
+    // Store summary into KV
+    kv.set(&format!("stripe:customer:{customer_id}"), format!("{:?}", sub)).await;
+
+    HttpResponse::Ok().body("✅ Subscription synced.")
+}
+
+use utoipa::ToSchema;
+use utoipa::path;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+
+#[derive(OpenApi)]
+#[openapi(paths(generate_checkout), components(schemas(User, CheckoutResponse)))]
+struct ApiDoc;
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    std::panic::set_hook(Box::new(|panic_info| {
+        eprintln!("💣 Panic occurred: {}", panic_info);
+    }));
+
     let this_script_relative_path = stdenv::args().next().unwrap_or_default();
     let this_script_name = std::path::Path::new(&this_script_relative_path)
         .file_name()
@@ -124,7 +251,7 @@ async fn main() -> std::io::Result<()> {
 
     // Initialize the logger
     setup_logger();
-
+    print_help();
     // Load .env .env_cors files and log error if not found
     load_env_file();
     check_env_cors();
@@ -154,7 +281,7 @@ async fn main() -> std::io::Result<()> {
     let mut port_failed = false;
     let mut when_errors_detected = false;
     // Attempt to load allowed origins
-    let allowed_origins = load_and_validate_cors_origins(".env_cors").unwrap_or_else(|e| {
+    let allowed_origins: Vec<String> = load_and_validate_cors_origins(".env_cors").unwrap_or_else(|e| {
         cors_failed = true;
         error!("Failed to load .env_cors, error: {:?}", e);
         vec![]
@@ -170,7 +297,7 @@ async fn main() -> std::io::Result<()> {
         port_failed
     );
 
-    let cors_origins = match load_and_validate_cors_origins(".env_cors") {
+    let cors_origins: Vec<String> = match load_and_validate_cors_origins(".env_cors") {
         Ok(origins) => {
             info!("CORS origins loaded successfully.");
             origins
@@ -289,7 +416,7 @@ async fn main() -> std::io::Result<()> {
     }
 
     let server = HttpServer::new(move || {
-        let cors = Cors::default()
+        let base_cors = Cors::default()
             .allow_any_method()
             .allow_any_header()
             .supports_credentials()
@@ -301,25 +428,23 @@ async fn main() -> std::io::Result<()> {
             ])
             .max_age(3600);
 
-        trace!("1 cors: {:?}", cors);
-        // let cors = cors_origins
-        //     .iter()
-        //     .fold(cors, |cors, origin| cors.allowed_origin(origin));
-        // Dynamically add allowed origins from the .env_cors file
-        // let cors = cors_origins
-        //     .iter()
-        //     .fold(cors, |cors, origin| cors.allowed_origin(origin));
-        let cors = Cors::permissive();
+        trace!("1 cors: {:?}", base_cors);
+        let cors = cors_origins.iter().fold(base_cors, |cors, origin| {
+            cors.allowed_origin(origin)
+        });
         trace!("2 cors: {:?}", cors);
 
         App::new()
-            .wrap(ActixLogger::default())
-            // .wrap(Logger::default())
             .wrap(cors)
+            .wrap(ActixLogger::default())
+            .service(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
+
             .configure(|cfg| {
                 cfg.route("/health", web::get().to(health))
                     .route("/customer", web::post().to(post_customer))
-                    .route("/charge", web::post().to(post_charge));
+                    .route("/charge", web::post().to(post_charge))
+                    .route("/success", web::get().to(success))
+                    .route("/generate-stripe-checkout", web::post().to(generate_checkout));
             })
     })
     .bind(format!("{}", target_server))?
@@ -346,7 +471,7 @@ async fn main() -> std::io::Result<()> {
             cors_failed,
             port_failed
         );
-        error!("Failed to start the server: {:?}", e);
+        error!("💥 Failed to start the server: {:?}", e);
         return Err(e);
     }
     if port_failed {
@@ -365,10 +490,3 @@ async fn main() -> std::io::Result<()> {
 
     Ok(())
 }
-
-//     if let Err(e) = server.run().await {
-//         eprintln!("💥 Server runtime failure: {e:?}");
-//     }
-
-//     Ok(())
-// }
